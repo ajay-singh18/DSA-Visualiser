@@ -1,0 +1,17 @@
+{
+  "name": "dsa-visualizer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive Algorithm & Execution Tracer — DSA Visualizer",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev --workspace=apps/server",
+    "dev:client": "npm run dev --workspace=apps/client",
+    "build:shared": "npm run build --workspace=packages/shared",
+    "build:server": "npm run build --workspace=apps/server",
+    "build:client": "npm run build --workspace=apps/client"
+  }
+}
