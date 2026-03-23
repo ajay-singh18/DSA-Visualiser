@@ -3,6 +3,9 @@ import Visualizer from './pages/Visualizer';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import AssessmentSetup from './pages/AssessmentSetup';
+import AssessmentQuiz from './pages/AssessmentQuiz';
+import AssessmentResults from './pages/AssessmentResults';
 import RaceMode from './pages/RaceMode';
 import Landing from './pages/Landing';
 import DocsHub from './pages/DocsHub';
@@ -20,6 +23,11 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        
+        {/* Assessment Routes */}
+        <Route path="/assessment" element={<AssessmentSetup />} />
+        <Route path="/assessment/quiz" element={<AssessmentQuiz />} />
+        <Route path="/assessment/results/:sessionId" element={<AssessmentResults />} />
       </Routes>
     </BrowserRouter>
   );

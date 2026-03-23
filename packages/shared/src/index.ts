@@ -158,3 +158,50 @@ export interface RunAlgorithmRequest {
   target?: number;
   startNodeId?: string;
 }
+
+// ── Assessment types ────────────────────────────────────────
+
+export type QuestionCategory = 'sorting' | 'searching' | 'graph' | 'tree' | 'dp';
+
+export type QuestionType = 'mcq' | 'predict-state' | 'find-bug';
+
+export interface AssessmentQuestion {
+  id: string;
+  category: QuestionCategory;
+  type: QuestionType;
+  difficulty: 'easy' | 'medium' | 'hard';
+  title: string;
+  description: string;
+  options?: string[];           // MCQ choices
+  codeSnippet?: string;         // For predict-state & find-bug
+  codeLanguage?: 'typescript' | 'cpp';
+  // NOTE: `correctAnswer` is NEVER sent to the client
+}
+
+export interface AssessmentConfig {
+  category: QuestionCategory;
+  questionCount: number;        // e.g. 10
+  timeLimitMinutes: number;     // e.g. 15
+}
+
+export interface AssessmentSubmission {
+  sessionId: string;
+  answers: { questionId: string; answer: string }[];
+}
+
+export interface AssessmentResultItem {
+  questionId: string;
+  question: AssessmentQuestion;
+  userAnswer: string;
+  correctAnswer: string;        // Revealed ONLY after submission
+  isCorrect: boolean;
+}
+
+export interface AssessmentResult {
+  sessionId: string;
+  score: number;
+  total: number;
+  percentage: number;
+  timeTakenSeconds: number;
+  results: AssessmentResultItem[];
+}

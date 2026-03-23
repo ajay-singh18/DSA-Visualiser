@@ -31,6 +31,7 @@ export default function Navbar() {
         <li><Link to="/visualizer" className={location.pathname === '/visualizer' ? 'active' : ''}>Visualizer</Link></li>
         <li><Link to="/race" className={location.pathname === '/race' ? 'active' : ''}>Race Mode</Link></li>
         <li><Link to="/docs" className={location.pathname.startsWith('/docs') ? 'active' : ''}>Docs</Link></li>
+        <li><Link to="/assessment" className={location.pathname === '/assessment' ? 'active' : ''}>Quiz</Link></li>
         <li><Link to="/dashboard" className={location.pathname === '/dashboard' ? 'active' : ''}>Dashboard</Link></li>
       </ul>
 
