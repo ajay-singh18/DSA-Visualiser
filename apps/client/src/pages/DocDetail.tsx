@@ -32,7 +32,7 @@ export default function DocDetail() {
     code: ({node, inline, ...props}: any) => 
       inline 
         ? <code style={{ background: 'var(--surface-color)', padding: '0.2rem 0.4rem', borderRadius: '4px', fontFamily: 'monospace', fontSize: '0.9em', color: 'var(--primary)' }} {...props} />
-        : <code style={{ display: 'block', padding: '1.5rem', background: '#1e1e1e', color: '#d4d4d4', borderRadius: '8px', overflowX: 'auto', fontFamily: 'monospace', lineHeight: 1.5, marginBottom: '1.5rem' }} {...props} />,
+        : <code style={{ display: 'block', padding: '1.5rem', background: '#1e1e1e', color: '#d4d4d4', borderRadius: '8px', overflowX: 'auto', fontFamily: 'monospace', lineHeight: 1.5, marginBottom: '1.5rem', whiteSpace: 'pre-wrap' }} {...props} />,
     pre: ({node, ...props}: any) => <pre style={{ margin: 0, padding: 0, background: 'transparent' }} {...props} />,
     blockquote: ({node, ...props}: any) => <blockquote style={{ borderLeft: '4px solid var(--primary)', margin: '1.5rem 0', padding: '1rem 1.5rem', background: 'var(--surface-color)', borderRadius: '0 8px 8px 0', color: 'var(--on-surface)' }} {...props} />,
   };

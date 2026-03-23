@@ -64,7 +64,16 @@ export interface Snapshot {
   treeState?: TreeNodeData[];
   dpTable?: (number | string)[][];  // for DP table visualization
   callStack?: string[];             // for recursion tree visualization
+  variables?: Record<string, string | number>;
   highlights?: SnapshotHighlights;
+}
+
+export interface PerformanceMetrics {
+  timeTakenMs: number;
+  comparisons: number;
+  swaps: number; // or general operations for graphs/trees
+  timeComplexity: string;
+  spaceComplexity: string;
 }
 
 export interface AlgorithmResult {
@@ -77,6 +86,7 @@ export interface AlgorithmResult {
   };
   snapshots: Snapshot[];
   totalSteps: number;
+  metrics?: PerformanceMetrics;
 }
 
 // ── Graph types ─────────────────────────────────────────────

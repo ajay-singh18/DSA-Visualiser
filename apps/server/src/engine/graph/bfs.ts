@@ -27,7 +27,7 @@ export function runBFS(
 
   snapshots.push({
     stepIndex: step++,
-    codeLine: 3,
+    codeLine: 1, // function bfs
     description: `Starting BFS from node "${startNodeId}"`,
     highlights: { currentNode: startNodeId, queue: [...queue], visited: [...visited] },
   });
@@ -37,7 +37,7 @@ export function runBFS(
 
     snapshots.push({
       stepIndex: step++,
-      codeLine: 7,
+      codeLine: 5, // shift
       description: `Dequeued node "${node}" — processing`,
       highlights: { currentNode: node, queue: [...queue], visited: [...visited] },
     });
@@ -49,7 +49,7 @@ export function runBFS(
 
         snapshots.push({
           stepIndex: step++,
-          codeLine: 11,
+          codeLine: 9, // queue push
           description: `Discovered neighbor "${neighbor}" → added to queue`,
           highlights: { currentNode: node, queue: [...queue], visited: [...visited] },
         });
@@ -59,7 +59,7 @@ export function runBFS(
 
   snapshots.push({
     stepIndex: step++,
-    codeLine: 16,
+    codeLine: 12, // end of func
     description: 'BFS complete! All reachable nodes visited.',
     highlights: { visited: [...visited] },
   });

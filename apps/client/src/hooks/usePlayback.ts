@@ -24,9 +24,9 @@ export function usePlayback() {
     }
   }, []);
 
-  const loadSnapshots = useCallback((snapshots: Snapshot[]) => {
+  const loadSnapshots = useCallback((snapshots: Snapshot[], autoPlay: boolean = false) => {
     clearTimer();
-    setState({ snapshots, currentIndex: 0, isPlaying: false, speed: 1 });
+    setState({ snapshots, currentIndex: 0, isPlaying: autoPlay, speed: 1 });
   }, [clearTimer]);
 
   const play = useCallback(() => {

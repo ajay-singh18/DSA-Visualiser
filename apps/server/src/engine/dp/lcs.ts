@@ -25,7 +25,7 @@ export function runLCS(str1: string, str2: string): {
   };
 
   snapshots.push({
-    stepIndex: step++, codeLine: 1,
+    stepIndex: step++, codeLine: 1, // function lcs
     description: `LCS of "${str1}" and "${str2}"`,
     dpTable: displayTable(), highlights: {},
   });
@@ -35,14 +35,14 @@ export function runLCS(str1: string, str2: string): {
       if (str1[i - 1] === str2[j - 1]) {
         dp[i][j] = dp[i - 1][j - 1] + 1;
         snapshots.push({
-          stepIndex: step++, codeLine: 8,
+          stepIndex: step++, codeLine: 8, // dp[i][j] = dp[i-1][j-1] + 1
           description: `Match: "${str1[i-1]}" === "${str2[j-1]}" → dp[${i}][${j}] = dp[${i-1}][${j-1}] + 1 = ${dp[i][j]}`,
           dpTable: displayTable(), highlights: { activeCell: [i + 1, j + 1] }, // +1 for header row/col
         });
       } else {
         dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
         snapshots.push({
-          stepIndex: step++, codeLine: 10,
+          stepIndex: step++, codeLine: 10, // dp[i][j] = Math.max...
           description: `No match: "${str1[i-1]}" ≠ "${str2[j-1]}" → dp[${i}][${j}] = max(${dp[i-1][j]}, ${dp[i][j-1]}) = ${dp[i][j]}`,
           dpTable: displayTable(), highlights: { activeCell: [i + 1, j + 1] },
         });
@@ -51,7 +51,7 @@ export function runLCS(str1: string, str2: string): {
   }
 
   snapshots.push({
-    stepIndex: step++, codeLine: 14,
+    stepIndex: step++, codeLine: 14, // return dp[m][n]
     description: `LCS length = ${dp[m][n]}`,
     dpTable: displayTable(), highlights: {},
   });

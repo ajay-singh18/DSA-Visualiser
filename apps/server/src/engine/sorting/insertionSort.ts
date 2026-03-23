@@ -18,7 +18,7 @@ export function runInsertionSort(data: number[]): { snapshots: Snapshot[] } {
   const n = arr.length;
   const sorted: number[] = [0];
 
-  addSnapshot(2, `Starting Insertion Sort. The first element arr[0] is trivially sorted.`, { sorted: [...sorted] });
+  addSnapshot(1, `Starting Insertion Sort. The first element arr[0] is trivially sorted.`, { sorted: [...sorted] });
 
   for (let i = 1; i < n; i++) {
     let current = arr[i];
@@ -26,20 +26,21 @@ export function runInsertionSort(data: number[]): { snapshots: Snapshot[] } {
 
     let j = i - 1;
     while (j >= 0 && arr[j] > current) {
-      addSnapshot(6, `Comparing ${current} with arr[${j}] (${arr[j]}). Since ${arr[j]} > ${current}, shifting ${arr[j]} right.`, { comparing: [j, j + 1], sorted: [...sorted] });
+      addSnapshot(5, `Comparing ${current} with arr[${j}] (${arr[j]}). Since ${arr[j]} > ${current}, shifting ${arr[j]} right.`, { comparing: [j, j + 1], sorted: [...sorted] });
       arr[j + 1] = arr[j];
-      addSnapshot(7, `Shifted arr[${j}] right.`, { swapping: [j, j + 1], sorted: [...sorted] });
+      addSnapshot(6, `Shifted arr[${j}] right.`, { swapping: [j, j + 1], sorted: [...sorted] });
       j--;
     }
 
-    addSnapshot(10, `Found correct position for ${current} at index ${j + 1}. Inserting it.`, { swapping: [j + 1], sorted: [...sorted] });
+    addSnapshot(9, `Found correct position for ${current} at index ${j + 1}. Inserting it.`, { swapping: [j + 1], sorted: [...sorted] });
     arr[j + 1] = current;
     
     sorted.push(i);
-    addSnapshot(11, `Inserted ${current}.`, { sorted: [...sorted] });
+    addSnapshot(9, `Inserted ${current}.`, { sorted: [...sorted] });
   }
 
-  addSnapshot(14, `Array is fully sorted.`, { sorted: [...sorted] });
+  addSnapshot(11, `Array is fully sorted.`, { sorted: [...sorted] });
+
 
   
 

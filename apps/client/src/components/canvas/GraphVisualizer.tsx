@@ -38,9 +38,16 @@ export default function GraphVisualizer({ snapshot, nodes, edges, isDirected }: 
     return { stroke, strokeWidth };
   };
 
+  const padding = 100;
+  const maxX = nodes.length > 0 ? Math.max(...nodes.map(n => n.x)) : 800;
+  const maxY = nodes.length > 0 ? Math.max(...nodes.map(n => n.y)) : 600;
+  const contentWidth = Math.max(maxX + padding, 800);
+  const contentHeight = Math.max(maxY + padding, 600);
+
   return (
-    <div className="canvas-area" style={{ position: 'relative', width: '100%', height: '100%' }}>
-      <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+    <div className="canvas-area" style={{ justifyContent: 'flex-start', alignItems: 'flex-start', overflow: 'auto', padding: 0 }}>
+      <div style={{ position: 'relative', minWidth: contentWidth, minHeight: contentHeight, margin: 'auto' }}>
+        <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="25" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" fill="rgba(255, 255, 255, 0.5)" />
@@ -116,6 +123,7 @@ export default function GraphVisualizer({ snapshot, nodes, edges, isDirected }: 
           {node.label || node.id}
         </motion.div>
       ))}
+      </div>
     </div>
   );
 }

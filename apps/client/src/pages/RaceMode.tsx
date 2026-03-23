@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+
 import type { AlgorithmType } from '@dsa-visualizer/shared';
 import ArrayVisualizer from '../components/canvas/ArrayVisualizer';
 import PlaybackBar from '../components/controls/PlaybackBar';

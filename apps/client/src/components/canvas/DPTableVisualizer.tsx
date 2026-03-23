@@ -63,8 +63,8 @@ export default function DPTableVisualizer({ snapshot }: DPTableVisualizerProps) 
   const activeCol = highlights?.activeCell?.[1] ?? -1;
 
   return (
-    <div className="canvas-area" style={{ alignItems: 'flex-start', justifyContent: 'center', padding: '1.5rem', overflow: 'auto' }}>
-      <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
+    <div className="canvas-area" style={{ alignItems: 'flex-start', justifyContent: 'flex-start', padding: '1.5rem', overflow: 'auto' }}>
+      <div style={{ overflowX: 'auto', maxWidth: '100%', margin: '0 auto' }}>
         <table style={{ borderCollapse: 'separate', borderSpacing: '2px' }}>
           <tbody>
             {table.map((row, ri) => (

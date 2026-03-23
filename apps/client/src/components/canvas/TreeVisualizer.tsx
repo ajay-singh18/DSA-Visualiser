@@ -20,12 +20,29 @@ export default function TreeVisualizer({ snapshot, treeNodes }: TreeVisualizerPr
     );
   }
 
+  const minX = Math.min(...nodes.map(n => n.x));
+  const maxX = Math.max(...nodes.map(n => n.x));
+  const minY = Math.min(...nodes.map(n => n.y));
+  const maxY = Math.max(...nodes.map(n => n.y));
+
+  const padding = 60;
+  // Add fallback widths to prevent NaN sizes if tree only has 1 node
+  const contentWidth = (maxX === minX ? 0 : maxX - minX) + padding * 2;
+  const contentHeight = (maxY === minY ? 0 : maxY - minY) + padding * 2;
+
+  // Shift nodes so that minX and minY evaluate functionally to (padding, padding)
+  const shiftedNodes = nodes.map(n => ({
+    ...n,
+    x: n.x - minX + padding,
+    y: n.y - minY + padding
+  }));
+
   // Build a lookup for edge drawing
-  const nodeMap = new Map(nodes.map(n => [n.id, n]));
+  const nodeMap = new Map(shiftedNodes.map(n => [n.id, n]));
 
   // Derive edges from parent → child relationships
   const edges: { from: TreeNodeData; to: TreeNodeData }[] = [];
-  for (const node of nodes) {
+  for (const node of shiftedNodes) {
     if (node.left) {
       const child = nodeMap.get(node.left);
       if (child) edges.push({ from: node, to: child });
@@ -62,10 +79,11 @@ export default function TreeVisualizer({ snapshot, treeNodes }: TreeVisualizerPr
 
   return (
     <div className="canvas-area" style={{ alignItems: 'flex-start', padding: '1rem', position: 'relative', overflow: 'auto' }}>
-      {/* SVG Edges */}
-      <svg
-        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
-      >
+      <div style={{ width: contentWidth, height: contentHeight, position: 'relative', margin: 'auto' }}>
+        {/* SVG Edges */}
+        <svg
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+        >
         {edges.map((edge, i) => (
           <motion.line
             key={`edge-${i}`}
@@ -83,7 +101,7 @@ export default function TreeVisualizer({ snapshot, treeNodes }: TreeVisualizerPr
       </svg>
 
       {/* Nodes */}
-      {nodes.map((node) => (
+      {shiftedNodes.map((node) => (
         <motion.div
           key={node.id}
           initial={{ scale: 0, opacity: 0 }}
@@ -113,6 +131,7 @@ export default function TreeVisualizer({ snapshot, treeNodes }: TreeVisualizerPr
           {node.value}
         </motion.div>
       ))}
+      </div>
     </div>
   );
 }

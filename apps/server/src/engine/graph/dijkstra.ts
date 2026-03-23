@@ -43,7 +43,7 @@ export function runDijkstra(graph: { nodes: GraphNode[], edges: GraphEdge[], isD
   distances.set(startNodeId, 0);
   pq.enqueue(startNodeId, 0);
 
-  addSnapshot(2, `Initializing Dijkstra's. Start node is ${startNodeId} with distance 0, all others Infinity.`, { visited: [] });
+  addSnapshot(1, `Initializing Dijkstra's. Start node is ${startNodeId} with distance 0, all others Infinity.`, { visited: [] });
 
   while (!pq.isEmpty()) {
     const current = pq.dequeue()!;
@@ -51,7 +51,7 @@ export function runDijkstra(graph: { nodes: GraphNode[], edges: GraphEdge[], isD
 
     if (visited.has(u)) continue;
 
-    addSnapshot(6, `Processing node ${u} with current shortest distance ${distances.get(u)}.`, { currentNode: u, visited: Array.from(visited) });
+    addSnapshot(7, `Processing node ${u} with current shortest distance ${distances.get(u)}.`, { currentNode: u, visited: Array.from(visited) });
     visited.add(u);
 
     const neighbors = adjList.get(u) || [];
@@ -68,12 +68,12 @@ export function runDijkstra(graph: { nodes: GraphNode[], edges: GraphEdge[], isD
         distances.set(v, alt);
         previous.set(v, u);
         pq.enqueue(v, alt);
-        addSnapshot(11, `Found shorter path to ${v}: updated distance to ${alt}.`, { currentNode: u, swapping: [v], visited: Array.from(visited) });
+        addSnapshot(12, `Found shorter path to ${v}: updated distance to ${alt}.`, { currentNode: u, swapping: [v], visited: Array.from(visited) });
       }
     }
   }
 
-  addSnapshot(17, `Dijkstra's complete. Shortest paths computed from ${startNodeId}.`, { visited: Array.from(visited) });
+  addSnapshot(16, `Dijkstra's complete. Shortest paths computed from ${startNodeId}.`, { visited: Array.from(visited) });
 
   
 

@@ -26,9 +26,11 @@ export function runDFS(
 
   snapshots.push({
     stepIndex: step++,
-    codeLine: 3,
+    codeLine: 1, // function dfs
     description: `Starting DFS from node "${startNodeId}"`,
     highlights: { currentNode: startNodeId, stack: [...stack], visited: [...visited] },
+    callStack: stack.map(id => `dfs(${id})`),
+    variables: { startNodeId },
   });
 
   while (stack.length > 0) {
@@ -37,9 +39,11 @@ export function runDFS(
     if (visited.has(node)) {
       snapshots.push({
         stepIndex: step++,
-        codeLine: 7,
+        codeLine: 2, // abstract visited set check
         description: `Node "${node}" already visited — skipping`,
         highlights: { currentNode: node, stack: [...stack], visited: [...visited] },
+        callStack: stack.map(id => `dfs(${id})`),
+        variables: { node },
       });
       continue;
     }
@@ -48,9 +52,11 @@ export function runDFS(
 
     snapshots.push({
       stepIndex: step++,
-      codeLine: 8,
+      codeLine: 2, // visited add
       description: `Visiting node "${node}"`,
       highlights: { currentNode: node, stack: [...stack], visited: [...visited] },
+      callStack: stack.map(id => `dfs(${id})`),
+      variables: { node },
     });
 
     const neighbors = adj.get(node) || [];
@@ -59,9 +65,11 @@ export function runDFS(
         stack.push(neighbor);
         snapshots.push({
           stepIndex: step++,
-          codeLine: 12,
+          codeLine: 5, // dfs call / push equivalent
           description: `Pushed neighbor "${neighbor}" onto stack`,
           highlights: { currentNode: node, stack: [...stack], visited: [...visited] },
+          callStack: stack.map(id => `dfs(${id})`),
+          variables: { node, neighbor },
         });
       }
     }
@@ -69,9 +77,11 @@ export function runDFS(
 
   snapshots.push({
     stepIndex: step++,
-    codeLine: 16,
+    codeLine: 8, // end of func
     description: 'DFS complete! All reachable nodes visited.',
     highlights: { visited: [...visited] },
+    callStack: [],
+    variables: {},
   });
 
   return { snapshots };

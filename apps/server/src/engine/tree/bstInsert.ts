@@ -36,46 +36,56 @@ function layoutTree(root: BSTNode | null, x: number = 400, y: number = 60, sprea
   return nodes;
 }
 
-function insertIntoBST(root: BSTNode | null, value: number, snapshots: Snapshot[], step: { count: number }): BSTNode {
+function insertIntoBST(root: BSTNode | null, value: number, snapshots: Snapshot[], step: { count: number }, getGlobalRoot: () => BSTNode | null, callStack: string[]): BSTNode {
+  const stackPush = `insert(${value})`;
+  const nextStack = root ? [...callStack, stackPush] : callStack;
   if (root === null) {
     const newNode = createNode(value);
-    const tree = layoutTree(newNode);
+    const tree = layoutTree(getGlobalRoot() || newNode);
     snapshots.push({
       stepIndex: step.count++,
-      codeLine: 3,
+      codeLine: 2, // if (node === null) return new Node(key);
       description: `Created new node with value ${value}`,
       treeState: tree,
       highlights: { activeNodes: [newNode.id] },
+      callStack: nextStack,
+      variables: { inserting: value },
     });
     return newNode;
   }
 
   snapshots.push({
     stepIndex: step.count++,
-    codeLine: 5,
+    codeLine: 3, // if (key < node.key)
     description: `Comparing ${value} with node ${root.value}`,
-    treeState: layoutTree(root),
+    treeState: layoutTree(getGlobalRoot()),
     highlights: { activeNodes: [root.id] },
+    callStack: nextStack,
+    variables: { inserting: value, rootVal: root.value },
   });
 
   if (value < root.value) {
     snapshots.push({
       stepIndex: step.count++,
-      codeLine: 6,
+      codeLine: 4, // node.left = insert(node.left, key);
       description: `${value} < ${root.value}, go left`,
-      treeState: layoutTree(root),
+      treeState: layoutTree(getGlobalRoot()),
       highlights: { activeNodes: [root.id], pathNodes: root.left ? [root.left.id] : [] },
+      callStack: nextStack,
+      variables: { inserting: value, rootVal: root.value },
     });
-    root.left = insertIntoBST(root.left, value, snapshots, step);
+    root.left = insertIntoBST(root.left, value, snapshots, step, getGlobalRoot, nextStack);
   } else if (value > root.value) {
     snapshots.push({
       stepIndex: step.count++,
-      codeLine: 8,
+      codeLine: 6, // node.right = insert(node.right, key);
       description: `${value} > ${root.value}, go right`,
-      treeState: layoutTree(root),
+      treeState: layoutTree(getGlobalRoot()),
       highlights: { activeNodes: [root.id], pathNodes: root.right ? [root.right.id] : [] },
+      callStack: nextStack,
+      variables: { inserting: value, rootVal: root.value },
     });
-    root.right = insertIntoBST(root.right, value, snapshots, step);
+    root.right = insertIntoBST(root.right, value, snapshots, step, getGlobalRoot, nextStack);
   }
 
   return root;
@@ -90,32 +100,40 @@ export function runBSTInsert(values: number[]): {
 
   snapshots.push({
     stepIndex: step.count++,
-    codeLine: 1,
+    codeLine: 1, // function insert(node, key)
     description: `Inserting values [${values.join(', ')}] into BST`,
     treeState: [],
     highlights: {},
+    callStack: [],
+    variables: {},
   });
 
   let root: BSTNode | null = null;
+  const getGlobalRoot = () => root;
+  
   for (const val of values) {
-    root = insertIntoBST(root, val, snapshots, step);
+    root = insertIntoBST(root, val, snapshots, step, getGlobalRoot, []);
 
     // After each insertion, show the full tree state
     snapshots.push({
       stepIndex: step.count++,
-      codeLine: 10,
+      codeLine: 9, // return node;
       description: `Inserted ${val}. Tree updated.`,
       treeState: layoutTree(root),
       highlights: {},
+      callStack: [],
+      variables: { lastInserted: val },
     });
   }
 
   snapshots.push({
     stepIndex: step.count++,
-    codeLine: 11,
+    codeLine: 9, // return node;
     description: 'BST construction complete!',
     treeState: layoutTree(root),
     highlights: { pathNodes: layoutTree(root).map(n => n.id) },
+    callStack: [],
+    variables: {},
   });
 
   return { snapshots };

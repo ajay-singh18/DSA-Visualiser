@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
+import AnimatedDemo from '../components/AnimatedDemo';
 
 const FloatingNode = ({ delay, x, y, size, color }: any) => (
   <motion.div
@@ -150,6 +151,11 @@ export default function Landing() {
                 🏁 Race Mode
               </button>
             </Link>
+          </motion.div>
+
+          {/* Interactive Demo Component */}
+          <motion.div variants={itemVariants} style={{ width: '100%' }}>
+            <AnimatedDemo />
           </motion.div>
 
           {/* Features Grid */}

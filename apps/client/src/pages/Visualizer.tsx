@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import type { AlgorithmType, GraphNode, GraphEdge } from '@dsa-visualizer/shared';
+import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import type { AlgorithmType, GraphNode, GraphEdge, PerformanceMetrics } from '@dsa-visualizer/shared';
 import ArrayVisualizer from '../components/canvas/ArrayVisualizer';
 import GraphVisualizer from '../components/canvas/GraphVisualizer';
 import TreeVisualizer from '../components/canvas/TreeVisualizer';
 import DPTableVisualizer from '../components/canvas/DPTableVisualizer';
+import StateOverlay from '../components/canvas/StateOverlay';
 import CodePanel from '../components/editor/CodePanel';
 import PlaybackBar from '../components/controls/PlaybackBar';
 import { usePlayback } from '../hooks/usePlayback';
@@ -14,23 +15,8 @@ import apiClient from '../api/client';
 const DEFAULT_ARRAY = '38, 27, 43, 3, 9, 82, 10';
 const DEFAULT_TREE_VALUES = '50, 30, 70, 20, 40, 60, 80';
 
-// A beautifully laid out default graph for initial testing
-const DEFAULT_NODES: GraphNode[] = [
-  { id: 'A', label: 'A', x: 200, y: 100 },
-  { id: 'B', label: 'B', x: 100, y: 250 },
-  { id: 'C', label: 'C', x: 300, y: 250 },
-  { id: 'D', label: 'D', x: 150, y: 400 },
-  { id: 'E', label: 'E', x: 400, y: 400 },
-];
-const DEFAULT_EDGES: GraphEdge[] = [
-  { source: 'A', target: 'B', weight: 4 },
-  { source: 'A', target: 'C', weight: 2 },
-  { source: 'B', target: 'C', weight: 1 },
-  { source: 'B', target: 'D', weight: 5 },
-  { source: 'C', target: 'D', weight: 8 },
-  { source: 'C', target: 'E', weight: 10 },
-  { source: 'D', target: 'E', weight: 2 },
-];
+// Default Graph layout string
+const DEFAULT_GRAPH_STR = 'A-B:4, A-C:2, B-C:1, B-D:5, C-D:8, C-E:10, D-E:2';
 
 const ALGORITHMS: { key: string; label: string; type: 'sorting' | 'searching' | 'graph' | 'tree' | 'dp' }[] = [
   { key: 'bubble-sort', label: 'Bubble Sort', type: 'sorting' },
@@ -69,6 +55,7 @@ export default function Visualizer() {
   // Data States
   const [inputArray, setInputArray] = useState<string>(DEFAULT_ARRAY);
   const [treeValues, setTreeValues] = useState<string>(DEFAULT_TREE_VALUES);
+  const [graphInput, setGraphInput] = useState<string>(DEFAULT_GRAPH_STR);
   const [searchTarget, setSearchTarget] = useState<string>('43');
   const [deleteTarget, setDeleteTarget] = useState<string>('30');
   const [startNode, setStartNode] = useState<string>('A');
@@ -78,6 +65,7 @@ export default function Visualizer() {
   
   // Editor & Player States
   const [languages, setLanguages] = useState<any>(null);
+  const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
   const [loading, setLoading] = useState(false);
 
   const playback = usePlayback();
@@ -93,6 +81,87 @@ export default function Visualizer() {
     setInputArray(arr.join(', '));
   }
 
+  function generateRandomTree() {
+    const len = Math.floor(Math.random() * 6) + 4; // 4-9 elements
+    const arr = Array.from({ length: len }, () => Math.floor(Math.random() * 95) + 5);
+    setTreeValues(arr.join(', '));
+  }
+
+  function generateRandomGraph() {
+    const nodes = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+    const numNodes = Math.floor(Math.random() * 3) + 4; // 4 to 6 nodes
+    const activeNodes = nodes.slice(0, numNodes);
+    const edgesFragment: string[] = [];
+    for (let i = 0; i < numNodes; i++) {
+      const u = activeNodes[i];
+      // pick 1-2 random targets
+      const targets = activeNodes.filter(n => n !== u).sort(() => 0.5 - Math.random()).slice(0, 2);
+      for (const v of targets) {
+        if (!edgesFragment.find(e => (e.includes(u) && e.includes(v)))) { // avoid duplicate edges crudely
+          edgesFragment.push(`${u}-${v}:${Math.floor(Math.random() * 10) + 1}`);
+        }
+      }
+    }
+    setGraphInput(edgesFragment.join(', '));
+  }
+
+  // Generate a live preview of the BST before running animations for traversals/deletions
+  const previewTreeNodes = useMemo(() => {
+    if (selectedAlgoMeta?.type !== 'tree' || algorithm === 'bst-insert') return [];
+    interface PreviewNode { id: string; value: number; left: PreviewNode | null; right: PreviewNode | null }
+    let idCounter = 0;
+    const insert = (root: PreviewNode | null, val: number): PreviewNode => {
+      if (!root) return { id: `n${idCounter++}`, value: val, left: null, right: null };
+      if (val < root.value) root.left = insert(root.left, val);
+      else if (val > root.value) root.right = insert(root.right, val);
+      return root;
+    };
+    let root: PreviewNode | null = null;
+    for (const val of currentTreeValues) root = insert(root, val);
+
+    const nodes: any[] = [];
+    const layout = (node: PreviewNode | null, cx: number, cy: number, gap: number) => {
+      if (!node) return;
+      nodes.push({ id: node.id, value: node.value, left: node.left?.id || null, right: node.right?.id || null, x: cx, y: cy });
+      layout(node.left, cx - gap, cy + 80, gap / 1.8);
+      layout(node.right, cx + gap, cy + 80, gap / 1.8);
+    };
+    layout(root, 400, 60, 160);
+    return nodes;
+  }, [selectedAlgoMeta?.type, algorithm, currentTreeValues]);
+
+  // Dynamically parse the graph string into circular nodes and edges
+  const currentGraph = useMemo(() => {
+    const edges: GraphEdge[] = [];
+    const nodeSet = new Set<string>();
+
+    const pairs = graphInput.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+    for (const pair of pairs) {
+      const [path, weightStr] = pair.split(':');
+      const [u, v] = path.split('-');
+      if (u && v) {
+         nodeSet.add(u);
+         nodeSet.add(v);
+         edges.push({ source: u, target: v, weight: weightStr ? parseInt(weightStr, 10) : 1 });
+      } else if (u) {
+         nodeSet.add(u);
+      }
+    }
+
+    const nodes: GraphNode[] = [];
+    const radius = 150;
+    const centerX = 250;
+    const centerY = 250;
+    const angleStep = (2 * Math.PI) / (nodeSet.size || 1);
+    let angle = -Math.PI / 2; // start top
+
+    for (const id of Array.from(nodeSet).sort()) {
+      nodes.push({ id, label: id, x: centerX + radius * Math.cos(angle), y: centerY + radius * Math.sin(angle) });
+      angle += angleStep;
+    }
+    return { nodes, edges };
+  }, [graphInput]);
+
   async function handleRun() {
     setLoading(true);
     try {
@@ -104,7 +173,7 @@ export default function Visualizer() {
         payload.data = currentArray;
         payload.target = parseInt(searchTarget, 10);
       } else if (selectedAlgoMeta?.type === 'graph') {
-        payload.data = { nodes: DEFAULT_NODES, edges: DEFAULT_EDGES, isDirected: false };
+        payload.data = { nodes: currentGraph.nodes, edges: currentGraph.edges, isDirected: false };
         payload.startNodeId = startNode;
       } else if (selectedAlgoMeta?.type === 'tree') {
         payload.data = currentTreeValues;
@@ -125,7 +194,8 @@ export default function Visualizer() {
       const res = await apiClient.post('/algorithms/run', payload);
       
       setLanguages(res.data.languages);
-      playback.loadSnapshots(res.data.snapshots);
+      setMetrics(res.data.metrics || null);
+      playback.loadSnapshots(res.data.snapshots, true); // true sets autoPlay to seamlessly animate
     } catch (err: any) {
       console.error(err);
       alert(err?.response?.data?.error || 'Failed to run algorithm. Ensure formatting is correct.');
@@ -199,6 +269,22 @@ export default function Visualizer() {
               />
             )}
 
+            {/* Graph connections input */}
+            {selectedAlgoMeta?.type === 'graph' && (
+              <>
+                <input
+                  className="input-field"
+                  style={{ width: '280px' }}
+                  placeholder="Edges: A-B:4, B-C:2..."
+                  value={graphInput}
+                  onChange={(e) => setGraphInput(e.target.value)}
+                />
+                <button className="btn-ghost" onClick={generateRandomGraph} title="Generate random graph" style={{ padding: '0.5rem 0.75rem' }}>
+                  🎲
+                </button>
+              </>
+            )}
+
             {/* Graph start node */}
             {selectedAlgoMeta?.type === 'graph' && (
               <input
@@ -212,13 +298,18 @@ export default function Visualizer() {
 
             {/* Tree input values */}
             {selectedAlgoMeta?.type === 'tree' && (
-              <input
-                className="input-field"
-                style={{ width: '280px' }}
-                placeholder="Values: 50, 30, 70, 20..."
-                value={treeValues}
-                onChange={(e) => setTreeValues(e.target.value)}
-              />
+              <>
+                <input
+                  className="input-field"
+                  style={{ width: '280px' }}
+                  placeholder="Values: 50, 30, 70, 20..."
+                  value={treeValues}
+                  onChange={(e) => setTreeValues(e.target.value)}
+                />
+                <button className="btn-ghost" onClick={generateRandomTree} title="Generate random tree values" style={{ padding: '0.5rem 0.75rem' }}>
+                  🎲
+                </button>
+              </>
             )}
 
             {/* BST Delete target */}
@@ -272,29 +363,34 @@ export default function Visualizer() {
             </button>
           </div>
 
-          <div style={{ flex: 1, position: 'relative' }}>
-            {selectedAlgoMeta?.type === 'graph' ? (
-              <GraphVisualizer
-                snapshot={playback.currentSnapshot}
-                nodes={DEFAULT_NODES}
-                edges={DEFAULT_EDGES}
-                isDirected={false}
-              />
-            ) : selectedAlgoMeta?.type === 'tree' ? (
-              <TreeVisualizer
-                snapshot={playback.currentSnapshot}
-                treeNodes={[]}
-              />
-            ) : selectedAlgoMeta?.type === 'dp' ? (
-              <DPTableVisualizer
-                snapshot={playback.currentSnapshot}
-              />
-            ) : (
-              <ArrayVisualizer
-                snapshot={playback.currentSnapshot}
-                originalArray={currentArray}
-              />
-            )}
+          {/* Interactive visual canvas bounds */}
+          <div style={{ flex: 1, display: 'flex', position: 'relative', overflow: 'hidden' }}>
+            
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+              {selectedAlgoMeta?.type === 'graph' ? (
+                <GraphVisualizer
+                  snapshot={playback.currentSnapshot}
+                  nodes={currentGraph.nodes}
+                  edges={currentGraph.edges}
+                  isDirected={false}
+                />
+              ) : selectedAlgoMeta?.type === 'tree' ? (
+                <TreeVisualizer
+                  snapshot={playback.currentSnapshot}
+                  treeNodes={previewTreeNodes}
+                />
+              ) : selectedAlgoMeta?.type === 'dp' ? (
+                <DPTableVisualizer snapshot={playback.currentSnapshot} />
+              ) : (
+                <ArrayVisualizer
+                  snapshot={playback.currentSnapshot}
+                  originalArray={currentArray}
+                />
+              )}
+            </div>
+
+            {/* Static variables and call stack tracing card */}
+            <StateOverlay snapshot={playback.currentSnapshot} />
           </div>
 
           <PlaybackBar
@@ -311,12 +407,43 @@ export default function Visualizer() {
           />
         </div>
 
-        {/* Right: Code editor */}
-        <div className="split-right">
-          <CodePanel
-            languages={languages}
-            currentLine={playback.currentSnapshot?.codeLine}
-          />
+        {/* Right: Code editor and Metrics */}
+        <div className="split-right" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ flex: 1, minHeight: 0 }}>
+            <CodePanel
+              languages={languages}
+              currentLine={playback.currentSnapshot?.codeLine}
+            />
+          </div>
+          
+          <div style={{
+            padding: '1rem',
+            background: 'rgba(0,0,0,0.2)',
+            borderTop: '1px solid var(--glass-border)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem'
+          }}>
+            <h4 style={{ margin: 0, color: 'var(--primary)', fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}>Performance Metrics</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ background: 'var(--glass-bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
+                <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time Taken</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? '#fff' : 'rgba(255,255,255,0.3)', marginTop: '0.25rem' }}>{metrics ? `${metrics.timeTakenMs}ms` : '-- ms'}</div>
+              </div>
+              <div style={{ background: 'var(--glass-bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
+                <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Operations</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? '#fff' : 'rgba(255,255,255,0.3)', marginTop: '0.25rem' }}>{metrics ? `${metrics.comparisons}C, ${metrics.swaps}S` : '--'}</div>
+              </div>
+              <div style={{ background: 'var(--glass-bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
+                <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time Complexity</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? 'var(--secondary)' : 'rgba(255,255,255,0.3)', marginTop: '0.25rem' }}>{metrics ? metrics.timeComplexity : '--'}</div>
+              </div>
+              <div style={{ background: 'var(--glass-bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
+                <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Space Complexity</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? 'var(--tertiary)' : 'rgba(255,255,255,0.3)', marginTop: '0.25rem' }}>{metrics ? metrics.spaceComplexity : '--'}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

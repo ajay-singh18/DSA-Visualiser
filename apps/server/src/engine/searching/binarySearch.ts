@@ -16,7 +16,7 @@ export function runBinarySearch(data: number[], target: number): { snapshots: Sn
     });
   }
 
-  addSnapshot(2, `Binary Search requires a sorted array. Array sorted: [${arr.join(', ')}]. Looking for ${target}.`, {});
+  addSnapshot(1, `Binary Search requires a sorted array. Array sorted: [${arr.join(', ')}]. Looking for ${target}.`, {});
 
   let left = 0;
   let right = arr.length - 1;
@@ -33,16 +33,16 @@ export function runBinarySearch(data: number[], target: number): { snapshots: Sn
     }
 
     if (arr[mid] < target) {
-      addSnapshot(7, `${arr[mid]} is less than ${target}, moving left pointer to ${mid + 1}.`, { comparing: [mid] });
+      addSnapshot(6, `${arr[mid]} is less than ${target}, moving left pointer to ${mid + 1}.`, { comparing: [mid] });
       left = mid + 1;
     } else {
-      addSnapshot(9, `${arr[mid]} is greater than ${target}, moving right pointer to ${mid - 1}.`, { comparing: [mid] });
+      addSnapshot(7, `${arr[mid]} is greater than ${target}, moving right pointer to ${mid - 1}.`, { comparing: [mid] });
       right = mid - 1;
     }
   }
 
   if (left > right) {
-    addSnapshot(12, `Search space exhausted. Target ${target} not found.`, {});
+    addSnapshot(9, `Search space exhausted. Target ${target} not found.`, {});
   }
 
   

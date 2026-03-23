@@ -44,58 +44,72 @@ function layoutTree(root: BSTNode | null, x = 400, y = 60, spread = 160): TreeNo
 
 // ── Traversal engines ──
 
-function inorderTraversal(node: BSTNode | null, root: BSTNode, visited: string[], snapshots: Snapshot[], step: { count: number }): void {
+function inorderTraversal(node: BSTNode | null, root: BSTNode, visited: string[], snapshots: Snapshot[], step: { count: number }, callStack: string[]): void {
   if (!node) return;
+
+  const stackPush = `inorder(${node.value})`;
+  const nextStack = [...callStack, stackPush];
+
+  snapshots.push({
+    stepIndex: step.count++, codeLine: 3, // inorder(root.left);
+    description: `Go left from ${node.value}`,
+    treeState: layoutTree(root), highlights: { activeNodes: [node.id], pathNodes: [...visited] },
+    callStack: nextStack, variables: { node: node.value },
+  });
+
+  inorderTraversal(node.left, root, visited, snapshots, step, nextStack);
+
+  visited.push(node.id);
+  snapshots.push({
+    stepIndex: step.count++, codeLine: 4, // console.log(root.val);
+    description: `Visit node ${node.value}`,
+    treeState: layoutTree(root), highlights: { activeNodes: [node.id], pathNodes: [...visited] },
+    callStack: nextStack, variables: { visiting: node.value },
+  });
+
+  inorderTraversal(node.right, root, visited, snapshots, step, nextStack);
+}
+
+function preorderTraversal(node: BSTNode | null, root: BSTNode, visited: string[], snapshots: Snapshot[], step: { count: number }, callStack: string[]): void {
+  if (!node) return;
+
+  const stackPush = `preorder(${node.value})`;
+  const nextStack = [...callStack, stackPush];
+
+  visited.push(node.id);
+  snapshots.push({
+    stepIndex: step.count++, codeLine: 3, // console.log(root.val);
+    description: `Visit node ${node.value}`,
+    treeState: layoutTree(root), highlights: { activeNodes: [node.id], pathNodes: [...visited] },
+    callStack: nextStack, variables: { visiting: node.value },
+  });
+
+  preorderTraversal(node.left, root, visited, snapshots, step, nextStack);
+  preorderTraversal(node.right, root, visited, snapshots, step, nextStack);
+}
+
+function postorderTraversal(node: BSTNode | null, root: BSTNode, visited: string[], snapshots: Snapshot[], step: { count: number }, callStack: string[]): void {
+  if (!node) return;
+
+  const stackPush = `postorder(${node.value})`;
+  const nextStack = [...callStack, stackPush];
 
   snapshots.push({
     stepIndex: step.count++, codeLine: 3,
     description: `Go left from ${node.value}`,
     treeState: layoutTree(root), highlights: { activeNodes: [node.id], pathNodes: [...visited] },
+    callStack: nextStack, variables: { node: node.value },
   });
 
-  inorderTraversal(node.left, root, visited, snapshots, step);
+  postorderTraversal(node.left, root, visited, snapshots, step, nextStack);
+  postorderTraversal(node.right, root, visited, snapshots, step, nextStack);
 
   visited.push(node.id);
   snapshots.push({
-    stepIndex: step.count++, codeLine: 4,
+    stepIndex: step.count++, codeLine: 5, // console.log(root.val);
     description: `Visit node ${node.value}`,
     treeState: layoutTree(root), highlights: { activeNodes: [node.id], pathNodes: [...visited] },
-  });
-
-  inorderTraversal(node.right, root, visited, snapshots, step);
-}
-
-function preorderTraversal(node: BSTNode | null, root: BSTNode, visited: string[], snapshots: Snapshot[], step: { count: number }): void {
-  if (!node) return;
-
-  visited.push(node.id);
-  snapshots.push({
-    stepIndex: step.count++, codeLine: 3,
-    description: `Visit node ${node.value}`,
-    treeState: layoutTree(root), highlights: { activeNodes: [node.id], pathNodes: [...visited] },
-  });
-
-  preorderTraversal(node.left, root, visited, snapshots, step);
-  preorderTraversal(node.right, root, visited, snapshots, step);
-}
-
-function postorderTraversal(node: BSTNode | null, root: BSTNode, visited: string[], snapshots: Snapshot[], step: { count: number }): void {
-  if (!node) return;
-
-  snapshots.push({
-    stepIndex: step.count++, codeLine: 3,
-    description: `Go left from ${node.value}`,
-    treeState: layoutTree(root), highlights: { activeNodes: [node.id], pathNodes: [...visited] },
-  });
-
-  postorderTraversal(node.left, root, visited, snapshots, step);
-  postorderTraversal(node.right, root, visited, snapshots, step);
-
-  visited.push(node.id);
-  snapshots.push({
-    stepIndex: step.count++, codeLine: 5,
-    description: `Visit node ${node.value}`,
-    treeState: layoutTree(root), highlights: { activeNodes: [node.id], pathNodes: [...visited] },
+    callStack: nextStack, variables: { visiting: node.value },
   });
 }
 
@@ -109,9 +123,9 @@ export function runInorder(values: number[]): { snapshots: Snapshot[]; } {
   const snapshots: Snapshot[] = [];
   const step = { count: 0 };
 
-  snapshots.push({ stepIndex: step.count++, codeLine: 1, description: `Inorder traversal of BST [${values.join(', ')}]`, treeState: layoutTree(root!), highlights: {} });
-  inorderTraversal(root, root!, [], snapshots, step);
-  snapshots.push({ stepIndex: step.count++, codeLine: 6, description: 'Inorder traversal complete!', treeState: layoutTree(root!), highlights: { pathNodes: layoutTree(root!).map(n => n.id) } });
+  snapshots.push({ stepIndex: step.count++, codeLine: 1, description: `Inorder traversal of BST [${values.join(', ')}]`, treeState: layoutTree(root!), highlights: {}, callStack: [] });
+  inorderTraversal(root, root!, [], snapshots, step, []);
+  snapshots.push({ stepIndex: step.count++, codeLine: 7, description: 'Inorder traversal complete!', treeState: layoutTree(root!), highlights: { pathNodes: layoutTree(root!).map(n => n.id) }, callStack: [], variables: {} });
 
   return { snapshots };
 }
@@ -124,9 +138,9 @@ export function runPreorder(values: number[]): { snapshots: Snapshot[]; } {
   const snapshots: Snapshot[] = [];
   const step = { count: 0 };
 
-  snapshots.push({ stepIndex: step.count++, codeLine: 1, description: `Preorder traversal of BST [${values.join(', ')}]`, treeState: layoutTree(root!), highlights: {} });
-  preorderTraversal(root, root!, [], snapshots, step);
-  snapshots.push({ stepIndex: step.count++, codeLine: 6, description: 'Preorder traversal complete!', treeState: layoutTree(root!), highlights: { pathNodes: layoutTree(root!).map(n => n.id) } });
+  snapshots.push({ stepIndex: step.count++, codeLine: 1, description: `Preorder traversal of BST [${values.join(', ')}]`, treeState: layoutTree(root!), highlights: {}, callStack: [] });
+  preorderTraversal(root, root!, [], snapshots, step, []);
+  snapshots.push({ stepIndex: step.count++, codeLine: 7, description: 'Preorder traversal complete!', treeState: layoutTree(root!), highlights: { pathNodes: layoutTree(root!).map(n => n.id) }, callStack: [], variables: {} });
 
   return { snapshots };
 }
@@ -139,9 +153,9 @@ export function runPostorder(values: number[]): { snapshots: Snapshot[]; } {
   const snapshots: Snapshot[] = [];
   const step = { count: 0 };
 
-  snapshots.push({ stepIndex: step.count++, codeLine: 1, description: `Postorder traversal of BST [${values.join(', ')}]`, treeState: layoutTree(root!), highlights: {} });
-  postorderTraversal(root, root!, [], snapshots, step);
-  snapshots.push({ stepIndex: step.count++, codeLine: 6, description: 'Postorder traversal complete!', treeState: layoutTree(root!), highlights: { pathNodes: layoutTree(root!).map(n => n.id) } });
+  snapshots.push({ stepIndex: step.count++, codeLine: 1, description: `Postorder traversal of BST [${values.join(', ')}]`, treeState: layoutTree(root!), highlights: {}, callStack: [] });
+  postorderTraversal(root, root!, [], snapshots, step, []);
+  snapshots.push({ stepIndex: step.count++, codeLine: 7, description: 'Postorder traversal complete!', treeState: layoutTree(root!), highlights: { pathNodes: layoutTree(root!).map(n => n.id) }, callStack: [], variables: {} });
 
   return { snapshots };
 }

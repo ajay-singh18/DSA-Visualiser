@@ -1,5 +1,5 @@
 import Editor from '@monaco-editor/react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface Props {
   languages?: {
@@ -13,8 +13,31 @@ interface Props {
 
 export default function CodePanel({ languages, currentLine }: Props) {
   const [lang, setLang] = useState<'cpp' | 'java' | 'python' | 'javascript'>('python');
+  const editorRef = useRef<any>(null);
+  const decorationsRef = useRef<string[]>([]);
   
   const code = languages ? languages[lang] : '// Select an algorithm and click Run';
+
+  useEffect(() => {
+    if (editorRef.current && currentLine) {
+      editorRef.current.revealLineInCenter(currentLine);
+      decorationsRef.current = editorRef.current.deltaDecorations(
+        decorationsRef.current,
+        [
+          {
+            range: { startLineNumber: currentLine, startColumn: 1, endLineNumber: currentLine, endColumn: 1 },
+            options: {
+              isWholeLine: true,
+              className: 'current-line-highlight',
+              glyphMarginClassName: 'current-line-glyph',
+            },
+          },
+        ]
+      );
+    } else if (editorRef.current) {
+      decorationsRef.current = editorRef.current.deltaDecorations(decorationsRef.current, []);
+    }
+  }, [currentLine, code]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -51,9 +74,10 @@ export default function CodePanel({ languages, currentLine }: Props) {
             hideCursorInOverviewRuler: true,
           }}
           onMount={(editor) => {
+            editorRef.current = editor;
             if (currentLine) {
               editor.revealLineInCenter(currentLine);
-              editor.deltaDecorations([], [
+              const newDecorations = editor.deltaDecorations([], [
                 {
                   range: { startLineNumber: currentLine, startColumn: 1, endLineNumber: currentLine, endColumn: 1 },
                   options: {
@@ -63,6 +87,7 @@ export default function CodePanel({ languages, currentLine }: Props) {
                   },
                 },
               ]);
+              decorationsRef.current = newDecorations;
             }
           }}
         />
