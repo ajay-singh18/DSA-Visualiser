@@ -11,6 +11,11 @@ export type AlgorithmType =
   | 'bfs'
   | 'dfs'
   | 'dijkstra'
+  | 'prims'
+  | 'kruskals'
+  | 'bellman-ford'
+  | 'floyd-warshall'
+  | 'a-star'
   | 'bst-insert'
   | 'bst-delete'
   | 'inorder'
@@ -154,16 +159,17 @@ export interface BookmarkDTO {
 
 export interface RunAlgorithmRequest {
   algorithmKey: AlgorithmType;
-  data: number[] | { nodes: GraphNode[]; edges: GraphEdge[]; isDirected?: boolean };
   target?: number;
+  data?: any; // e.g. number[] | (number | null)[] | string | { nodes: GraphNode[], edges: GraphEdge[], isDirected: boolean }
   startNodeId?: string;
+  targetNodeId?: string;
 }
 
 // ── Assessment types ────────────────────────────────────────
 
-export type QuestionCategory = 'sorting' | 'searching' | 'graph' | 'tree' | 'dp';
+export type QuestionCategory = 'sorting' | 'searching' | 'graph' | 'tree' | 'dp' | 'logic';
 
-export type QuestionType = 'mcq' | 'predict-state' | 'find-bug';
+export type QuestionType = 'mcq' | 'predict-state' | 'find-bug' | 'logic';
 
 export interface AssessmentQuestion {
   id: string;
@@ -173,8 +179,9 @@ export interface AssessmentQuestion {
   title: string;
   description: string;
   options?: string[];           // MCQ choices
-  codeSnippet?: string;         // For predict-state & find-bug
-  codeLanguage?: 'typescript' | 'cpp';
+  codeSnippet?: string;         // For predict-state, find-bug & logic
+  codeLanguage?: 'typescript' | 'cpp' | 'javascript' | 'java';
+  timeLimitSeconds?: number;    // Auto-derived from difficulty (easy=30, medium=60, hard=90)
   // NOTE: `correctAnswer` is NEVER sent to the client
 }
 

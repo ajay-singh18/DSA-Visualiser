@@ -1,8 +1,10 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import apiClient from '../api/client';
 import type { AssessmentResult, AssessmentResultItem } from '@dsa-visualizer/shared';
 
-const CodeSnippet = ({ code, language }: { code: string, language?: string }) => (
+const CodeSnippet = ({ code }: { code: string, language?: string }) => (
   <div style={{ background: '#0d1117', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', overflowX: 'auto', marginTop: '1rem' }}>
     <pre style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.875rem', color: '#c9d1d9', lineHeight: 1.5 }}>
       <code>{code}</code>
@@ -17,7 +19,7 @@ const ResultCard = ({ item, index }: { item: AssessmentResultItem; index: number
     <div style={{ 
       background: 'var(--surface)', 
       borderRadius: 'var(--radius-xl)', 
-      border: \`1px solid \${isCorrect ? 'rgba(52, 211, 153, 0.3)' : 'rgba(248, 113, 113, 0.3)'}\`,
+      border: `1px solid ${isCorrect ? 'rgba(52, 211, 153, 0.3)' : 'rgba(248, 113, 113, 0.3)'}`,
       overflow: 'hidden',
       marginBottom: '1.5rem'
     }}>
@@ -47,7 +49,7 @@ const ResultCard = ({ item, index }: { item: AssessmentResultItem; index: number
           <div style={{ 
             padding: '1rem', borderRadius: '8px', 
             background: isCorrect ? 'rgba(52, 211, 153, 0.05)' : 'rgba(248, 113, 113, 0.05)',
-            border: \`1px dashed \${isCorrect ? 'rgba(52, 211, 153, 0.3)' : 'rgba(248, 113, 113, 0.3)'}\`
+            border: `1px dashed ${isCorrect ? 'rgba(52, 211, 153, 0.3)' : 'rgba(248, 113, 113, 0.3)'}`
           }}>
             <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--on-surface-variant)', marginBottom: '0.5rem' }}>Your Answer</div>
             <div style={{ fontWeight: 500, fontFamily: item.question.type === 'predict-state' ? 'var(--font-mono)' : 'inherit' }}>
@@ -76,15 +78,51 @@ const ResultCard = ({ item, index }: { item: AssessmentResultItem; index: number
 export default function AssessmentResults() {
   const location = useLocation();
   const navigate = useNavigate();
-  const state = location.state as { result: AssessmentResult } | undefined;
+  const { sessionId } = useParams<{ sessionId: string }>();
+  const stateResult = (location.state as { result: AssessmentResult } | undefined)?.result;
 
-  if (!state || !state.result) {
+  const [result, setResult] = useState<AssessmentResult | null>(stateResult || null);
+  const [loading, setLoading] = useState(!stateResult);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    // If we already have state from navigation, no need to fetch
+    if (stateResult) return;
+    // Otherwise fetch from API (e.g. page refresh)
+    if (!sessionId) { navigate('/assessment'); return; }
+
+    async function fetchResults() {
+      try {
+        const res = await apiClient.get(`/assessments/results/${sessionId}`);
+        setResult(res.data);
+      } catch (err: any) {
+        console.error(err);
+        setError(err?.response?.data?.error || 'Failed to load results.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchResults();
+  }, [sessionId, stateResult, navigate]);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-default)' }}>
+        <Navbar />
+        <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <p style={{ color: 'var(--on-surface-variant)', fontSize: '1.25rem' }}>Loading results...</p>
+        </main>
+      </div>
+    );
+  }
+
+  if (error || !result) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-default)' }}>
         <Navbar />
         <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center' }}>
-            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>No Results Found</h2>
+            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{error || 'No Results Found'}</h2>
             <button className="btn-gradient" onClick={() => navigate('/assessment')}>Take an Assessment</button>
           </div>
         </main>
@@ -92,7 +130,6 @@ export default function AssessmentResults() {
     );
   }
 
-  const { result } = state;
   const isPassing = result.percentage >= 70;
 
   return (

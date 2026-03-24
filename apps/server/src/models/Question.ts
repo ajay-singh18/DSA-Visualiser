@@ -8,8 +8,9 @@ export interface IQuestion extends Document {
   title: string;
   description: string;
   options?: string[]; // Defined if MCQ
-  codeSnippet?: string; // Defined if predict-state or find-bug
-  codeLanguage?: 'typescript' | 'cpp';
+  codeSnippet?: string; // Defined if predict-state, find-bug, or logic
+  codeLanguage?: 'typescript' | 'cpp' | 'javascript' | 'java';
+  timeLimitSeconds?: number; // Auto-derived: easy=30, medium=60, hard=90
   correctAnswer: string; // The backend truth value
 }
 
@@ -22,7 +23,8 @@ const QuestionSchema = new Schema<IQuestion>(
     description: { type: String, required: true },
     options: { type: [String], default: undefined },
     codeSnippet: { type: String },
-    codeLanguage: { type: String, enum: ['typescript', 'cpp'] },
+    codeLanguage: { type: String, enum: ['typescript', 'cpp', 'javascript', 'java'] },
+    timeLimitSeconds: { type: Number },
     correctAnswer: { type: String, required: true },
   },
   { timestamps: true }

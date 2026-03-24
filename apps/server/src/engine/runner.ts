@@ -24,6 +24,11 @@ import { runBinarySearch } from './searching/binarySearch.js';
 import { runBFS } from './graph/bfs.js';
 import { runDFS } from './graph/dfs.js';
 import { runDijkstra } from './graph/dijkstra.js';
+import { runPrims } from './graph/prims.js';
+import { runKruskals } from './graph/kruskals.js';
+import { runBellmanFord } from './graph/bellmanFord.js';
+import { runFloydWarshall } from './graph/floydWarshall.js';
+import { runAStar } from './graph/aStar.js';
 
 // Tree
 import { runBSTInsert } from './tree/bstInsert.js';
@@ -37,7 +42,7 @@ import { runLCS } from './dp/lcs.js';
 
 const SORTING_ALGORITHMS = new Set<AlgorithmType>(['bubble-sort', 'merge-sort', 'quick-sort', 'selection-sort', 'insertion-sort']);
 const SEARCHING_ALGORITHMS = new Set<AlgorithmType>(['linear-search', 'binary-search']);
-const GRAPH_ALGORITHMS = new Set<AlgorithmType>(['bfs', 'dfs', 'dijkstra']);
+const GRAPH_ALGORITHMS = new Set<AlgorithmType>(['bfs', 'dfs', 'dijkstra', 'prims', 'kruskals', 'bellman-ford', 'floyd-warshall', 'a-star']);
 const TREE_ALGORITHMS = new Set<AlgorithmType>(['bst-insert', 'bst-delete', 'inorder', 'preorder', 'postorder']);
 const DP_ALGORITHMS = new Set<AlgorithmType>(['fibonacci-recursive', 'fibonacci-dp', 'knapsack-dp', 'lcs-dp']);
 
@@ -52,6 +57,11 @@ const COMPLEXITY_MAP: Record<AlgorithmType, { time: string, space: string }> = {
   'bfs': { time: 'O(V + E)', space: 'O(V)' },
   'dfs': { time: 'O(V + E)', space: 'O(V)' },
   'dijkstra': { time: 'O((V + E) log V)', space: 'O(V)' },
+  'prims': { time: 'O((V + E) log V)', space: 'O(V)' },
+  'kruskals': { time: 'O(E log E)', space: 'O(V)' },
+  'bellman-ford': { time: 'O(V * E)', space: 'O(V)' },
+  'floyd-warshall': { time: 'O(V^3)', space: 'O(V^2)' },
+  'a-star': { time: 'O(E)', space: 'O(V)' },
   'bst-insert': { time: 'O(log N)', space: 'O(1)' },
   'bst-delete': { time: 'O(log N)', space: 'O(1)' },
   'inorder': { time: 'O(N)', space: 'O(N)' },
@@ -131,17 +141,31 @@ export function runAlgorithm(request: RunAlgorithmRequest): AlgorithmResult {
       case 'bfs': result = runBFS(graphData.nodes, graphData.edges, startNodeId, graphData.isDirected); break;
       case 'dfs': result = runDFS(graphData.nodes, graphData.edges, startNodeId, graphData.isDirected); break;
       case 'dijkstra': result = runDijkstra(graphData, startNodeId); break;
+      case 'prims': result = runPrims(graphData, startNodeId); break;
+      case 'kruskals': result = runKruskals(graphData); break;
+      case 'bellman-ford': result = runBellmanFord(graphData, startNodeId); break;
+      case 'floyd-warshall': result = runFloydWarshall(graphData); break;
+      case 'a-star': {
+        const targetNodeId = request.targetNodeId || graphData.nodes[graphData.nodes.length - 1]?.id;
+        if (!targetNodeId) throw new Error('A* requires a targetNodeId');
+        result = runAStar(graphData, startNodeId, targetNodeId); 
+        break;
+      }
       default: throw new Error(`Unknown graph algorithm: ${algorithmKey}`);
     }
   }
 
   // ── Tree algorithms ──
   else if (TREE_ALGORITHMS.has(algorithmKey)) {
-    if (!Array.isArray(data)) throw new Error('Tree algorithms require an array of numbers');
+    if (!Array.isArray(data)) throw new Error('Tree algorithms require an array of numbers or nulls');
 
     switch (algorithmKey) {
-      case 'bst-insert': result = runBSTInsert(data); break;
-      case 'bst-delete': result = runBSTDelete(data, target ?? data[data.length - 1]); break;
+      case 'bst-insert': result = runBSTInsert(data.filter((n: any) => n !== null)); break;
+      case 'bst-delete': {
+        const validData = data.filter((n: any) => n !== null);
+        result = runBSTDelete(validData, target ?? validData[validData.length - 1]); 
+        break;
+      }
       case 'inorder': result = runInorder(data); break;
       case 'preorder': result = runPreorder(data); break;
       case 'postorder': result = runPostorder(data); break;

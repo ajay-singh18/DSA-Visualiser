@@ -10,13 +10,13 @@ const CATEGORIES: { id: QuestionCategory; title: string; icon: string; desc: str
   { id: 'graph', title: 'Graphs', icon: '🕸️', desc: 'BFS, DFS, Dijkstra' },
   { id: 'tree', title: 'Trees', icon: '🌲', desc: 'BST Insert, Delete, Traversals' },
   { id: 'dp', title: 'Dynamic Prog', icon: '🧠', desc: 'Fibonacci, Knapsack, LCS' },
+  { id: 'logic', title: 'Logic Section', icon: '💡', desc: 'Code Output & Logic Puzzles' },
 ];
 
 export default function AssessmentSetup() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<QuestionCategory>('sorting');
   const [questionCount, setQuestionCount] = useState(5);
-  const [timeLimit, setTimeLimit] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -30,7 +30,6 @@ export default function AssessmentSetup() {
       const res = await apiClient.post('/assessments/start', {
         category: selectedCategory,
         questionCount,
-        timeLimitMinutes: timeLimit
       });
 
       // Pass the quiz data to the quiz interface via router state
@@ -86,7 +85,7 @@ export default function AssessmentSetup() {
                       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-2)',
                       padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)',
                       background: selectedCategory === cat.id ? 'rgba(96, 165, 250, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-                      border: \`1px solid \${selectedCategory === cat.id ? '#60a5fa' : 'rgba(255,255,255,0.1)'}\`,
+                      border: `1px solid ${selectedCategory === cat.id ? '#60a5fa' : 'rgba(255,255,255,0.1)'}`,
                       cursor: 'pointer', transition: 'all 0.2s', textAlign: 'center'
                     }}
                   >
@@ -112,15 +111,12 @@ export default function AssessmentSetup() {
               </div>
 
               <div style={{ flex: 1, minWidth: '200px' }}>
-                <label style={{ display: 'block', marginBottom: 'var(--space-2)', color: 'var(--on-surface-variant)', fontWeight: 500 }}>
-                  Time Limit
+                <label style={{ display: 'block', marginBottom: 'var(--space-2)', color: 'var(--on-surface-variant)', opacity: 0.6, fontWeight: 500 }}>
+                  Assessment Duration
                 </label>
-                <select className="select-field" value={timeLimit} onChange={e => setTimeLimit(Number(e.target.value))}>
-                  <option value={5}>5 Minutes</option>
-                  <option value={10}>10 Minutes</option>
-                  <option value={15}>15 Minutes</option>
-                  <option value={30}>30 Minutes</option>
-                </select>
+                <div style={{ padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', color: 'var(--on-surface-variant)', fontSize: '0.875rem' }}>
+                  Auto-calculated based on difficulty
+                </div>
               </div>
             </div>
 

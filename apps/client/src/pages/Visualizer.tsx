@@ -13,7 +13,7 @@ import Navbar from '../components/Navbar';
 import apiClient from '../api/client';
 
 const DEFAULT_ARRAY = '38, 27, 43, 3, 9, 82, 10';
-const DEFAULT_TREE_VALUES = '50, 30, 70, 20, 40, 60, 80';
+const DEFAULT_TREE_VALUES = '50, 30, 70, 20, null, 60, 80';
 
 // Default Graph layout string
 const DEFAULT_GRAPH_STR = 'A-B:4, A-C:2, B-C:1, B-D:5, C-D:8, C-E:10, D-E:2';
@@ -29,6 +29,11 @@ const ALGORITHMS: { key: string; label: string; type: 'sorting' | 'searching' | 
   { key: 'bfs', label: 'Breadth-First Search (BFS)', type: 'graph' },
   { key: 'dfs', label: 'Depth-First Search (DFS)', type: 'graph' },
   { key: 'dijkstra', label: "Dijkstra's Algorithm", type: 'graph' },
+  { key: 'prims', label: "Prim's (MST)", type: 'graph' },
+  { key: 'kruskals', label: "Kruskal's (MST)", type: 'graph' },
+  { key: 'bellman-ford', label: 'Bellman-Ford', type: 'graph' },
+  { key: 'floyd-warshall', label: 'Floyd-Warshall', type: 'graph' },
+  { key: 'a-star', label: 'A* Search', type: 'graph' },
   { key: 'bst-insert', label: 'BST Insert', type: 'tree' },
   { key: 'bst-delete', label: 'BST Delete', type: 'tree' },
   { key: 'inorder', label: 'Inorder Traversal', type: 'tree' },
@@ -59,6 +64,7 @@ export default function Visualizer() {
   const [searchTarget, setSearchTarget] = useState<string>('43');
   const [deleteTarget, setDeleteTarget] = useState<string>('30');
   const [startNode, setStartNode] = useState<string>('A');
+  const [aStarTarget, setAStarTarget] = useState<string>('E');
   const [dpParam, setDpParam] = useState<string>('8');
   const [lcsStrings, setLcsStrings] = useState<string>('ABCBDAB:BDCABA');
   const [knapsackInput, setKnapsackInput] = useState<string>('7, 1, 3, 4, 5, 1, 4, 5, 7');
@@ -73,7 +79,14 @@ export default function Visualizer() {
   
   // Derived state for the actual array to pass to ArrayVisualizer
   const currentArray = inputArray.split(',').map((n) => parseInt(n.trim(), 10)).filter((n) => !isNaN(n));
-  const currentTreeValues = treeValues.split(',').map((n) => parseInt(n.trim(), 10)).filter((n) => !isNaN(n));
+  const currentTreeValues = useMemo(() => {
+    return treeValues.split(',').map(s => {
+      const t = s.trim().toLowerCase();
+      if (t === 'null') return null;
+      const parsed = parseInt(t, 10);
+      return isNaN(parsed) ? undefined : parsed;
+    }).filter(v => v !== undefined) as (number | null)[];
+  }, [treeValues]);
 
   function generateRandomArray() {
     const len = Math.floor(Math.random() * 8) + 5; // 5-12 elements
@@ -82,9 +95,37 @@ export default function Visualizer() {
   }
 
   function generateRandomTree() {
-    const len = Math.floor(Math.random() * 6) + 4; // 4-9 elements
-    const arr = Array.from({ length: len }, () => Math.floor(Math.random() * 95) + 5);
-    setTreeValues(arr.join(', '));
+    const isBST = algorithm === 'bst-insert' || algorithm === 'bst-delete';
+    if (isBST) {
+      // BST modes: pure number arrays, no nulls
+      const len = Math.floor(Math.random() * 6) + 5;
+      const arr = Array.from({ length: len }, () => Math.floor(Math.random() * 95) + 5);
+      setTreeValues(arr.join(', '));
+      return;
+    }
+    // Traversals: build a structurally valid level-order array with random nulls
+    const targetNodes = Math.floor(Math.random() * 5) + 4; // 4-8 actual nodes
+    const result: (number | string)[] = [];
+    let placed = 0;
+    let pendingSlots = 1; // start with the root slot
+
+    while (placed < targetNodes && pendingSlots > 0) {
+      const isNull = result.length > 0 && Math.random() < 0.2;
+      if (isNull) {
+        result.push('null');
+        // null consumes a slot but doesn't open child slots
+      } else {
+        result.push(Math.floor(Math.random() * 95) + 5);
+        placed++;
+        pendingSlots += 2; // this node opens 2 child slots
+      }
+      pendingSlots--; // consumed one slot
+    }
+    // Trim trailing nulls
+    while (result.length > 0 && result[result.length - 1] === 'null') {
+      result.pop();
+    }
+    setTreeValues(result.join(', '));
   }
 
   function generateRandomGraph() {
@@ -105,19 +146,44 @@ export default function Visualizer() {
     setGraphInput(edgesFragment.join(', '));
   }
 
-  // Generate a live preview of the BST before running animations for traversals/deletions
+  // Generate a live preview of the tree before running animations for traversals/deletions
   const previewTreeNodes = useMemo(() => {
     if (selectedAlgoMeta?.type !== 'tree' || algorithm === 'bst-insert') return [];
     interface PreviewNode { id: string; value: number; left: PreviewNode | null; right: PreviewNode | null }
     let idCounter = 0;
-    const insert = (root: PreviewNode | null, val: number): PreviewNode => {
-      if (!root) return { id: `n${idCounter++}`, value: val, left: null, right: null };
-      if (val < root.value) root.left = insert(root.left, val);
-      else if (val > root.value) root.right = insert(root.right, val);
-      return root;
-    };
     let root: PreviewNode | null = null;
-    for (const val of currentTreeValues) root = insert(root, val);
+    
+    // bst-delete requires a real BST. Traversals can use any generic tree.
+    if (algorithm === 'bst-delete') {
+      const insert = (root: PreviewNode | null, val: number): PreviewNode => {
+        if (!root) return { id: `n${idCounter++}`, value: val, left: null, right: null };
+        if (val < root.value) root.left = insert(root.left, val);
+        else if (val > root.value) root.right = insert(root.right, val);
+        return root;
+      };
+      for (const val of currentTreeValues) {
+        if (val !== null) root = insert(root, val);
+      }
+    } else {
+       // Regular generic tree (Level Order)
+       if (currentTreeValues.length === 0 || currentTreeValues[0] === null) return [];
+       root = { id: `n${idCounter++}`, value: currentTreeValues[0]!, left: null, right: null };
+       const queue = [root];
+       let i = 1;
+       while (queue.length > 0 && i < currentTreeValues.length) {
+         const curr = queue.shift()!;
+         if (i < currentTreeValues.length && currentTreeValues[i] !== null) {
+           curr.left = { id: `n${idCounter++}`, value: currentTreeValues[i]!, left: null, right: null };
+           queue.push(curr.left);
+         }
+         i++;
+         if (i < currentTreeValues.length && currentTreeValues[i] !== null) {
+           curr.right = { id: `n${idCounter++}`, value: currentTreeValues[i]!, left: null, right: null };
+           queue.push(curr.right);
+         }
+         i++;
+       }
+    }
 
     const nodes: any[] = [];
     const layout = (node: PreviewNode | null, cx: number, cy: number, gap: number) => {
@@ -175,6 +241,9 @@ export default function Visualizer() {
       } else if (selectedAlgoMeta?.type === 'graph') {
         payload.data = { nodes: currentGraph.nodes, edges: currentGraph.edges, isDirected: false };
         payload.startNodeId = startNode;
+        if (algorithm === 'a-star') {
+          payload.targetNodeId = aStarTarget;
+        }
       } else if (selectedAlgoMeta?.type === 'tree') {
         payload.data = currentTreeValues;
         if (algorithm === 'bst-delete') {
@@ -296,13 +365,24 @@ export default function Visualizer() {
               />
             )}
 
+            {/* A* Target Node */}
+            {algorithm === 'a-star' && (
+              <input
+                className="input-field"
+                style={{ width: '120px' }}
+                placeholder="Target Node (E)"
+                value={aStarTarget}
+                onChange={(e) => setAStarTarget(e.target.value)}
+              />
+            )}
+
             {/* Tree input values */}
             {selectedAlgoMeta?.type === 'tree' && (
               <>
                 <input
                   className="input-field"
-                  style={{ width: '280px' }}
-                  placeholder="Values: 50, 30, 70, 20..."
+                  style={{ width: '400px' }}
+                  placeholder="e.g. 50, 30, 70, null, 40..."
                   value={treeValues}
                   onChange={(e) => setTreeValues(e.target.value)}
                 />

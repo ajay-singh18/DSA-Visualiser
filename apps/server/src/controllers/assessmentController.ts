@@ -5,9 +5,10 @@ import { AssessmentSession } from '../models/AssessmentSession.js';
 
 export const startAssessment = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { category, questionCount, timeLimitMinutes } = req.body;
+    const { category, questionCount } = req.body;
+    let { timeLimitMinutes } = req.body;
     
-    if (!category || !questionCount || !timeLimitMinutes) {
+    if (!category || !questionCount) {
       res.status(400).json({ error: 'Missing required fields' });
       return;
     }
@@ -25,6 +26,13 @@ export const startAssessment = async (req: AuthRequest, res: Response): Promise<
 
     const questionIds = questions.map(q => q._id);
 
+    // Calculate total time limit if not provided by client (which we'll prefer in Setup UI)
+    // Each question has its own timeLimitSeconds (easy=30s, med=60s, hard=90s)
+    if (!timeLimitMinutes) {
+      const totalSeconds = questions.reduce((acc, current) => acc + (current.timeLimitSeconds || 60), 0);
+      timeLimitMinutes = Math.max(1, Math.ceil(totalSeconds / 60));
+    }
+
     // Create session
     const session = await AssessmentSession.create({
       userId: req.userId,
@@ -36,8 +44,9 @@ export const startAssessment = async (req: AuthRequest, res: Response): Promise<
 
     // Remove correct answers before sending to client
     const sanitizedQuestions = questions.map(q => {
-      const { correctAnswer, ...rest } = q;
-      return { id: rest._id, ...rest };
+      const { correctAnswer, _id, __v, ...rest } = q;
+      // timeLimitSeconds is public (auto-derived from difficulty) — safe to send
+      return { id: _id.toString(), ...rest };
     });
 
     res.json({
@@ -90,18 +99,32 @@ export const submitAssessment = async (req: AuthRequest, res: Response): Promise
 
     let correctCount = 0;
     const results = [];
-    const dbAnswersFormat = new Map<string, string>();
+    const dbAnswersFormat: Record<string, string> = {};
 
+    // Build a lookup from submitted answers
+    const answerLookup: Record<string, string> = {};
     for (const item of answers) {
-      const q = questionMap.get(item.questionId);
+      answerLookup[item.questionId] = item.answer;
+    }
+
+    // Iterate ALL session questions so unanswered ones appear in results too
+    for (const qId of session.questionIds) {
+      const q = questionMap.get(qId.toString());
       if (!q) continue;
 
-      dbAnswersFormat.set(item.questionId, item.answer);
+      const userAnswer = answerLookup[qId.toString()] || '';
+      dbAnswersFormat[qId.toString()] = userAnswer;
 
-      const isCorrect = q.correctAnswer === item.answer;
+      // Normalize predict-state answers: strip spaces, compare case-insensitive
+      let isCorrect: boolean;
+      if (q.type === 'predict-state') {
+        const normalize = (s: string) => s.replace(/\s+/g, '').toLowerCase();
+        isCorrect = normalize(q.correctAnswer) === normalize(userAnswer);
+      } else {
+        isCorrect = q.correctAnswer === userAnswer;
+      }
       if (isCorrect) correctCount++;
 
-      // We send back the correct answers to the client ONLY now
       results.push({
         questionId: q._id.toString(),
         question: {
@@ -115,7 +138,7 @@ export const submitAssessment = async (req: AuthRequest, res: Response): Promise
           codeSnippet: q.codeSnippet,
           codeLanguage: q.codeLanguage
         },
-        userAnswer: item.answer,
+        userAnswer,
         correctAnswer: q.correctAnswer,
         isCorrect
       });
@@ -126,6 +149,7 @@ export const submitAssessment = async (req: AuthRequest, res: Response): Promise
     session.answers = dbAnswersFormat;
     session.score = correctCount;
     session.total = session.questionIds.length;
+    session.markModified('answers');
     await session.save();
 
     res.json({
@@ -142,16 +166,149 @@ export const submitAssessment = async (req: AuthRequest, res: Response): Promise
   }
 };
 
+export const getSessionResults = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { sessionId } = req.params;
+    const session = await AssessmentSession.findOne({ _id: sessionId, userId: req.userId });
+    if (!session) {
+      res.status(404).json({ error: 'Session not found' });
+      return;
+    }
+    if (!session.submittedAt) {
+      res.status(400).json({ error: 'Session not yet submitted' });
+      return;
+    }
+
+    const questions = await Question.find({ _id: { $in: session.questionIds } });
+    const questionMap = new Map();
+    questions.forEach(q => questionMap.set(q._id.toString(), q));
+
+    const timeTakenSeconds = Math.floor(
+      (session.submittedAt.getTime() - session.startedAt.getTime()) / 1000
+    );
+
+    const answersObj = (session.answers as Record<string, string>) || {};
+    const results = [];
+    for (const qId of session.questionIds) {
+      const q = questionMap.get(qId.toString());
+      if (!q) continue;
+      const userAnswer = answersObj[qId.toString()] || '';
+      let isCorrect: boolean;
+      if (q.type === 'predict-state') {
+        const normalize = (s: string) => s.replace(/\s+/g, '').toLowerCase();
+        isCorrect = normalize(q.correctAnswer) === normalize(userAnswer);
+      } else {
+        isCorrect = q.correctAnswer === userAnswer;
+      }
+      results.push({
+        questionId: q._id.toString(),
+        question: {
+          id: q._id.toString(),
+          category: q.category, type: q.type, difficulty: q.difficulty,
+          title: q.title, description: q.description,
+          options: q.options, codeSnippet: q.codeSnippet, codeLanguage: q.codeLanguage
+        },
+        userAnswer,
+        correctAnswer: q.correctAnswer,
+        isCorrect
+      });
+    }
+
+    res.json({
+      sessionId: session._id,
+      score: session.score,
+      total: session.total,
+      percentage: session.total ? Math.round(((session.score || 0) / session.total) * 100) : 0,
+      timeTakenSeconds,
+      results
+    });
+  } catch (error) {
+    console.error('Get session results error:', error);
+    res.status(500).json({ error: 'Failed to retrieve results' });
+  }
+};
+
 export const getAssessmentHistory = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const sessions = await AssessmentSession.find({ 
       userId: req.userId,
       submittedAt: { $exists: true } 
-    }).sort({ createdAt: -1 });
+    }).sort({ createdAt: -1 }).limit(20);
 
     res.json(sessions);
   } catch (error) {
     console.error('Get assessment history error:', error);
     res.status(500).json({ error: 'Failed to retrieve assessment history' });
+  }
+};
+
+export const getAssessmentStats = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const sessions = await AssessmentSession.find({
+      userId: req.userId,
+      submittedAt: { $exists: true }
+    });
+
+    if (sessions.length === 0) {
+      res.json({
+        totalQuizzes: 0,
+        averageScore: 0,
+        bestCategory: null,
+        categoryBreakdown: [],
+        recentSessions: []
+      });
+      return;
+    }
+
+    // Category breakdown
+    const catMap: Record<string, { total: number; correct: number; count: number }> = {};
+    let totalCorrect = 0;
+    let totalQuestions = 0;
+
+    for (const s of sessions) {
+      const cat = s.category;
+      if (!catMap[cat]) catMap[cat] = { total: 0, correct: 0, count: 0 };
+      catMap[cat].total += s.total || 0;
+      catMap[cat].correct += s.score || 0;
+      catMap[cat].count += 1;
+      totalCorrect += s.score || 0;
+      totalQuestions += s.total || 0;
+    }
+
+    const categoryBreakdown = Object.entries(catMap).map(([category, data]) => ({
+      category,
+      quizzesTaken: data.count,
+      totalQuestions: data.total,
+      correctAnswers: data.correct,
+      accuracy: data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0
+    }));
+
+    // Best category by accuracy
+    const bestCat = categoryBreakdown.reduce((best, cur) =>
+      cur.accuracy > (best?.accuracy || 0) ? cur : best, categoryBreakdown[0]);
+
+    // Recent sessions (last 10)
+    const recentSessions = sessions
+      .sort((a, b) => new Date(b.submittedAt!).getTime() - new Date(a.submittedAt!).getTime())
+      .slice(0, 10)
+      .map(s => ({
+        id: s._id,
+        category: s.category,
+        score: s.score,
+        total: s.total,
+        percentage: s.total ? Math.round(((s.score || 0) / s.total) * 100) : 0,
+        submittedAt: s.submittedAt
+      }));
+
+    res.json({
+      totalQuizzes: sessions.length,
+      averageScore: totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0,
+      bestCategory: bestCat?.category || null,
+      categoryBreakdown,
+      recentSessions
+    });
+  } catch (error) {
+    console.error('Get assessment stats error:', error);
+    res.status(500).json({ error: 'Failed to retrieve assessment stats' });
   }
 };

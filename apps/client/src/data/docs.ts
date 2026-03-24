@@ -332,6 +332,186 @@ function Dijkstra(Graph, source):
     `
   },
   {
+    key: 'prims',
+    title: "Prim's Algorithm",
+    category: 'graph',
+    shortDesc: 'A greedy algorithm that finds a minimum spanning tree for a weighted undirected graph by constantly attaching the cheapest edge from the tree to a vertex not yet in the tree.',
+    timeComplexity: 'O((V + E) log V)',
+    spaceComplexity: 'O(V)',
+    content: `
+# Prim's Algorithm
+
+Prim's algorithm is a greedy algorithm that finds a minimum spanning tree for a weighted undirected graph. This means it finds a subset of the edges that forms a tree that includes every vertex, where the total weight of all the edges in the tree is minimized.
+
+### How it works
+1. Initialize a tree with a single vertex, chosen arbitrarily from the graph.
+2. Grow the tree by one edge: of the edges that connect the tree to vertices not yet in the tree, find the minimum-weight edge, and transfer it to the tree.
+3. Repeat step 2 (until all vertices are in the tree).
+
+### Pseudocode
+\`\`\`text
+function PrimMST(Graph):
+    for each u in Graph.V:
+        key[u] = INFINITY
+        parent[u] = NULL
+    key[StartNode] = 0
+    Q = all vertices in Graph
+    while Q is not empty:
+        u = Extract-Min(Q)
+        for each v adjacent to u:
+            if v in Q and weight(u, v) < key[v]:
+                parent[v] = u
+                key[v] = weight(u, v)
+\`\`\`
+    `
+  },
+  {
+    key: 'kruskals',
+    title: "Kruskal's Algorithm",
+    category: 'graph',
+    shortDesc: 'A greedy algorithm that finds a minimum spanning tree for a connected weighted graph by sorting all edges and adding them one by one considering cycle formations.',
+    timeComplexity: 'O(E log E)',
+    spaceComplexity: 'O(V)',
+    content: `
+# Kruskal's Algorithm
+
+Kruskal's algorithm finds a minimum spanning forest of an undirected edge-weighted graph. If the graph is connected, it finds a minimum spanning tree. It is a greedy algorithm in graph theory as it finds a minimum spanning tree for a connected weighted graph adding increasing cost arcs at each step.
+
+It uses a Disjoint-Set (Union-Find) data structure to keep track of subsets of vertices to prevent cycle formation.
+
+### How it works
+1. Sort all the edges from low weight to high.
+2. Take the edge with the lowest weight and add it to the spanning tree. If adding the edge created a cycle, then reject this edge.
+3. Keep adding edges until we reach all vertices.
+
+### Pseudocode
+\`\`\`text
+function KruskalMST(Graph):
+    A = empty set
+    for each vertex v in Graph.V:
+        Make-Set(v)
+    sort the edges of Graph.E by non-decreasing weight w
+    for each edge (u, v) uniformly chosen in Graph.E:
+        if Find-Set(u) != Find-Set(v):
+            A = A U {(u, v)}
+            Union(u, v)
+    return A
+\`\`\`
+    `
+  },
+  {
+    key: 'bellman-ford',
+    title: 'Bellman-Ford Algorithm',
+    category: 'graph',
+    shortDesc: 'Computes shortest paths from a single source vertex to all of the other vertices in a weighted digraph. Accommodates negative edge weights, unlike Dijkstra.',
+    timeComplexity: 'O(V * E)',
+    spaceComplexity: 'O(V)',
+    content: `
+# Bellman-Ford Algorithm
+
+The Bellman-Ford algorithm computes shortest paths from a single source vertex to all of the other vertices in a weighted digraph. It is slower than Dijkstra's algorithm for the same problem, but more versatile, as it is capable of handling graphs in which some of the edge weights are negative numbers.
+
+It relaxes all edges $V-1$ times (where V is the number of vertices). If distance values update on the $V$-th pass, it signifies the presence of a negative weight cycle.
+
+### Pseudocode
+\`\`\`text
+function BellmanFord(Graph, source):
+    for each vertex v in Graph:
+        dist[v] = INFINITY
+    dist[source] = 0
+    
+    // Relax edges |V| - 1 times
+    for i from 1 to |V| - 1:
+        for each edge (u, v) with weight w in Graph:
+            if dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                
+    // Check for negative-weight cycles
+    for each edge (u, v) with weight w in Graph:
+        if dist[u] + w < dist[v]:
+            error "Graph contains a negative-weight cycle"
+            
+    return dist
+\`\`\`
+    `
+  },
+  {
+    key: 'floyd-warshall',
+    title: 'Floyd-Warshall Algorithm',
+    category: 'graph',
+    shortDesc: 'An algorithm for finding shortest paths in a weighted graph with positive or negative edge weights (but with no negative cycles) between all pairs of vertices.',
+    timeComplexity: 'O(V³)',
+    spaceComplexity: 'O(V²)',
+    content: `
+# Floyd-Warshall Algorithm
+
+The Floyd-Warshall algorithm is an algorithm for finding shortest paths in a weighted graph with positive or negative edge weights (but with no negative cycles). A single execution of the algorithm will find the lengths (summed weights) of shortest paths between **all pairs** of vertices.
+
+It uses dynamic programming to iteratively improve an estimate on the shortest path between two vertices, until the estimate is optimal.
+
+### Pseudocode
+\`\`\`text
+function FloydWarshall(Graph):
+    // Initialize dist matrix
+    for each vertex v in Graph:
+        dist[v][v] = 0
+    for each edge (u, v) in Graph:
+        dist[u][v] = weight(u, v)
+        
+    for k from 1 to |V|: // k is the intermediate vertex
+        for i from 1 to |V|:
+            for j from 1 to |V|:
+                if dist[i][j] > dist[i][k] + dist[k][j]:
+                    dist[i][j] = dist[i][k] + dist[k][j]
+                    
+    return dist
+\`\`\`
+    `
+  },
+  {
+    key: 'a-star',
+    title: 'A* Search',
+    category: 'graph',
+    shortDesc: 'A graph traversal and path search algorithm, often used in computer science due to its completeness, optimality, and optimal efficiency utilizing heuristics.',
+    timeComplexity: 'O(E)',
+    spaceComplexity: 'O(V)',
+    content: `
+# A* Search Algorithm
+
+A* (pronounced "A-star") is a graph traversal and path search algorithm. It is arguably the most popular choice for pathfinding because it is fairly flexible and can be used in a wide range of contexts.
+
+A* is an informed search algorithm, meaning that it is formulated in terms of weighted graphs: starting from a specific node of a graph, it aims to find a path to the given goal node having the smallest cost. It does this by maintaining a tree of paths originating at the start node and extending those paths one edge at a time until its termination criterion is satisfied.
+
+A* selects the path that minimizes $f(n) = g(n) + h(n)$:
+*   **$n$** is the next node on the path.
+*   **$g(n)$** is the cost of the path from the start node to $n$.
+*   **$h(n)$** is a heuristic function that estimates the cost of the cheapest path from $n$ to the goal.
+
+### Pseudocode
+\`\`\`text
+function A_Star(start, goal):
+    openSet = {start}
+    gScore[start] = 0
+    fScore[start] = h(start) // Heuristic estimate
+    
+    while openSet is not empty:
+        current = node in openSet with lowest fScore[]
+        if current == goal:
+            return reconstruct_path(current)
+            
+        openSet.remove(current)
+        for each neighbor of current:
+            tentative_gScore = gScore[current] + weight(current, neighbor)
+            if tentative_gScore < gScore[neighbor]:
+                cameFrom[neighbor] = current
+                gScore[neighbor] = tentative_gScore
+                fScore[neighbor] = gScore[neighbor] + h(neighbor)
+                if neighbor not in openSet:
+                    openSet.add(neighbor)
+\`\`\`
+    `
+  },
+  {
     key: 'bst-insert',
     title: 'BST Insertion',
     category: 'tree',

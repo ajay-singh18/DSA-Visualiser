@@ -8,7 +8,7 @@ export interface IAssessmentSession extends Document {
   startedAt: Date;
   timeLimitMinutes: number;
   submittedAt?: Date;
-  answers?: Map<string, string>; // Maps questionId string to userAnswer string
+  answers?: Record<string, string>; // Maps questionId string to userAnswer string
   score?: number;
   total?: number;
 }
@@ -21,7 +21,7 @@ const AssessmentSessionSchema = new Schema<IAssessmentSession>(
     startedAt: { type: Date, required: true, default: Date.now },
     timeLimitMinutes: { type: Number, required: true },
     submittedAt: { type: Date },
-    answers: { type: Map, of: String },
+    answers: { type: Schema.Types.Mixed },
     score: { type: Number },
     total: { type: Number },
   },

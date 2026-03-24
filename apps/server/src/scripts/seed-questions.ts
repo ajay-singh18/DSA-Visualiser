@@ -4,251 +4,292 @@ import { env } from '../config/env.js';
 import { Question } from '../models/Question.js';
 import type { QuestionCategory, QuestionType } from '@dsa-visualizer/shared';
 
-// Helper types for the seed data
-type SeedQuestion = {
-  category: QuestionCategory;
-  type: QuestionType;
-  difficulty: 'easy' | 'medium' | 'hard';
-  title: string;
-  description: string;
-  options?: string[];
-  codeSnippet?: string;
-  codeLanguage?: 'typescript' | 'cpp';
-  correctAnswer: string;
-};
+const tl = (d: 'easy'|'medium'|'hard') => d === 'easy' ? 30 : d === 'medium' ? 60 : 90;
+type SQ = { category: QuestionCategory; type: QuestionType; difficulty: 'easy'|'medium'|'hard';
+  title: string; description: string; options?: string[]; codeSnippet?: string;
+  codeLanguage?: 'typescript'|'cpp'|'javascript'|'java'; timeLimitSeconds: number; correctAnswer: string; };
 
-const questions: SeedQuestion[] = [
-  // --- SORTING ---
-  {
-    category: 'sorting',
-    type: 'mcq',
-    difficulty: 'easy',
-    title: 'Bubble Sort Time Complexity',
-    description: 'What is the worst-case time complexity of Bubble Sort?',
-    options: ['O(n)', 'O(n log n)', 'O(n^2)', 'O(log n)'],
-    correctAnswer: 'O(n^2)'
-  },
-  {
-    category: 'sorting',
-    type: 'mcq',
-    difficulty: 'medium',
-    title: 'Quick Sort Pivot',
-    description: 'If the pivot is always chosen as the largest or smallest element in an array, what is the time complexity of Quick Sort?',
-    options: ['O(n)', 'O(n log n)', 'O(n^2)', 'O(log n)'],
-    correctAnswer: 'O(n^2)'
-  },
-  {
-    category: 'sorting',
-    type: 'predict-state',
-    difficulty: 'easy',
-    title: 'Selection Sort Pass',
-    description: 'Given the array [5, 3, 8, 2, 1, 4], what will the array look like after the FIRST complete pass of Selection Sort (finding the minimum and swapping it to the front)? Provide your answer as a comma-separated list without brackets.',
-    correctAnswer: '1, 3, 8, 2, 5, 4'
-  },
-  {
-    category: 'sorting',
-    type: 'predict-state',
-    difficulty: 'medium',
-    title: 'Insertion Sort Iteration',
-    description: 'Given the array [4, 7, 2, 8, 1], what is the state of the array after the number 2 is inserted into its correct sorted position?',
-    correctAnswer: '2, 4, 7, 8, 1'
-  },
-  {
-    category: 'sorting',
-    type: 'find-bug',
-    difficulty: 'medium',
-    title: 'Merge Sort Recursion Bug',
-    description: 'Identify the line causing an infinite recursion bug in this Merge Sort implementation.',
-    codeLanguage: 'typescript',
-    codeSnippet: `1: function mergeSort(arr: number[]): number[] {
-2:   if (arr.length <= 1) return arr;
-3:   const mid = Math.floor(arr.length / 2);
-4:   // BUG IS HERE:
-5:   const left = mergeSort(arr.slice(0, mid + 1)); 
-6:   const right = mergeSort(arr.slice(mid + 1));
-7:   return merge(left, right);
-8: }`,
-    options: ['Line 2', 'Line 3', 'Line 5', 'Line 7'],
-    correctAnswer: 'Line 5'
-  },
-  
-  // --- SEARCHING ---
-  {
-    category: 'searching',
-    type: 'mcq',
-    difficulty: 'easy',
-    title: 'Binary Search Requirement',
-    description: 'What is the fundamental prerequisite for an array before you can perform a Binary Search?',
-    options: ['It must contain only positive integers', 'It must be sorted', 'It must have an odd length', 'It must not contain duplicates'],
-    correctAnswer: 'It must be sorted'
-  },
-  {
-    category: 'searching',
-    type: 'predict-state',
-    difficulty: 'medium',
-    title: 'Binary Search Pointers',
-    description: 'You are applying Binary Search on [2, 5, 8, 12, 16, 23, 38, 56, 72, 91] looking for the target "23". What are the indices of (low, mid, high) on the VERY FIRST check?',
-    correctAnswer: '0, 4, 9'
-  },
-  {
-    category: 'searching',
-    type: 'find-bug',
-    difficulty: 'hard',
-    title: 'Binary Search Overflow',
-    description: 'Which line contains the classic integer overflow bug when calculating the midpoint in languages with bounded integers?',
-    codeLanguage: 'cpp',
-    codeSnippet: `1: int binarySearch(int arr[], int l, int r, int x) {
-2:     while (l <= r) {
-3:         int m = (l + r) / 2;
-4:         if (arr[m] == x) return m;
-5:         if (arr[m] < x) l = m + 1;
-6:         else r = m - 1;
-7:     }
-8:     return -1;
-9: }`,
-    options: ['Line 2', 'Line 3', 'Line 5', 'Line 6'],
-    correctAnswer: 'Line 3'
-  },
+const q = (cat: QuestionCategory, type: QuestionType, diff: 'easy'|'medium'|'hard',
+  title: string, desc: string, ans: string, opts?: string[], code?: string): SQ => ({
+  category: cat, type, difficulty: diff, title, description: desc, correctAnswer: ans,
+  timeLimitSeconds: tl(diff), ...(opts ? { options: opts } : {}),
+  ...(code ? { codeSnippet: code, codeLanguage: 'javascript' as const } : {}),
+});
 
-  // --- GRAPH ---
-  {
-    category: 'graph',
-    type: 'mcq',
-    difficulty: 'easy',
-    title: 'BFS Queue',
-    description: 'Which data structure is fundamentally used to process nodes in Breadth-First Search (BFS)?',
-    options: ['Stack', 'Queue', 'Priority Queue', 'Hash Map'],
-    correctAnswer: 'Queue'
-  },
-  {
-    category: 'graph',
-    type: 'predict-state',
-    difficulty: 'medium',
-    title: 'DFS Traversal Path',
-    description: 'Given a directed graph A->B, A->C, B->D, C->D. If we start a standard Depth-First Search (DFS) from A, and always visit alphabetical neighbors first, what is the exact visit order?',
-    correctAnswer: 'A, B, D, C'
-  },
-  {
-    category: 'graph',
-    type: 'find-bug',
-    difficulty: 'medium',
-    title: 'Graph Cycle Infinite Loop',
-    description: 'Why will this DFS implementation crash on a graph with cycles?',
-    codeLanguage: 'typescript',
-    codeSnippet: `1: function dfs(graph: Record<string, string[]>, start: string) {
-2:   const stack = [start];
-3:   while (stack.length > 0) {
-4:     const node = stack.pop()!;
-5:     console.log(node);
-6:     for (const neighbor of graph[node] || []) {
-7:       stack.push(neighbor);
-8:     }
-9:   }
-10: }`,
-    options: ['It uses a Stack instead of a Queue', 'It pops from the end instead of the front', 'It does not track a visited Set', 'It pushes neighbors in the wrong order'],
-    correctAnswer: 'It does not track a visited Set'
-  },
+const questions: SQ[] = [
+// ══════ SORTING (35) ══════
+q('sorting','mcq','easy','Bubble Sort Worst Case','Worst-case time complexity of Bubble Sort?','O(n²)',['O(n)','O(n log n)','O(n²)','O(log n)']),
+q('sorting','mcq','easy','Bubble Sort Best Case','Best-case of optimized Bubble Sort?','O(n)',['O(1)','O(n)','O(n log n)','O(n²)']),
+q('sorting','mcq','easy','Stable Sort Example','Which is a stable sorting algorithm?','Merge Sort',['Quick Sort','Heap Sort','Merge Sort','Selection Sort']),
+q('sorting','mcq','easy','In-Place Sorting','Which sorts in-place with O(1) extra space?','Insertion Sort',['Merge Sort','Insertion Sort','Counting Sort','Radix Sort']),
+q('sorting','mcq','easy','Insertion Best Case','Best-case of Insertion Sort?','O(n)',['O(1)','O(n)','O(n log n)','O(n²)']),
+q('sorting','mcq','medium','Quick Sort Best','Best-case of Quick Sort?','O(n log n)',['O(n)','O(n log n)','O(n²)','O(1)']),
+q('sorting','mcq','medium','Quick Sort Worst','When does Quick Sort become O(n²)?','Pivot is always min or max',['Random pivot','Median pivot','Pivot is always min or max','Never']),
+q('sorting','mcq','medium','Merge Sort Space','Space complexity of Merge Sort?','O(n)',['O(1)','O(log n)','O(n)','O(n²)']),
+q('sorting','mcq','medium','Selection Sort Swaps','Max swaps in Selection Sort for n elements?','n - 1',['n','n - 1','n²','n log n']),
+q('sorting','mcq','medium','Timsort Hybrid','Timsort combines which two?','Merge Sort + Insertion Sort',['Quick + Merge','Merge Sort + Insertion Sort','Heap + Quick','Bubble + Selection']),
+q('sorting','mcq','medium','Merge Sort Stability','Is Merge Sort stable?','Yes',['Yes','No','Only for integers','Depends on implementation']),
+q('sorting','mcq','hard','Heap Sort Space','Space complexity of Heap Sort?','O(1)',['O(n)','O(log n)','O(1)','O(n log n)']),
+q('sorting','mcq','hard','Sorting Lower Bound','Lower bound for comparison-based sorting?','O(n log n)',['O(n)','O(n log n)','O(n²)','O(log n)']),
+q('sorting','mcq','hard','Radix Sort Time','Radix Sort for n numbers, d digits, base b?','O(d(n + b))',['O(n log n)','O(n²)','O(d(n + b))','O(nd²)']),
+q('sorting','predict-state','easy','Bubble Pass 1','[5,3,8,1] after ONE pass of Bubble Sort?','3, 5, 1, 8'),
+q('sorting','predict-state','easy','Selection Pass 1','[64,25,12,22] after 1st Selection Sort pass?','12, 25, 64, 22'),
+q('sorting','predict-state','easy','Sorted Already','How many passes does optimized Bubble Sort need on [1,2,3,4]?','1'),
+q('sorting','predict-state','medium','Insertion After Index 2','[7,4,5,2]: after inserting 5 into sorted [4,7], array becomes?','4, 5, 7, 2'),
+q('sorting','predict-state','medium','Merge Two Halves','Merging [1,5,9] and [2,4,6] gives?','1, 2, 4, 5, 6, 9'),
+q('sorting','predict-state','medium','Heap Insert Root','Insert 20 into max-heap [15,10,8,5,4]. New root?','20'),
+q('sorting','predict-state','hard','Lomuto Partition','Lomuto partition [3,7,2,5,1] pivot=1 (last). After partition?','1, 7, 2, 5, 3'),
+q('sorting','predict-state','hard','Hoare Partition','Hoare partition [8,3,5,1,4,2] pivot=8. After partition?','2, 3, 5, 1, 4, 8'),
+q('sorting','find-bug','medium','No Early Exit','This Bubble Sort always runs O(n²). Fix?','Add swapped flag to exit early',['Change loop bound','Add swapped flag to exit early','Use >= instead of >','Start i from 1'],
+  'function bubbleSort(arr) {\n  for (let i = 0; i < arr.length - 1; i++)\n    for (let j = 0; j < arr.length - i - 1; j++)\n      if (arr[j] > arr[j+1]) [arr[j], arr[j+1]] = [arr[j+1], arr[j]];\n  return arr;\n}'),
+q('sorting','find-bug','medium','Merge Sort Infinite','Why infinite recursion here?','Left slice includes mid so never shrinks',['Base case wrong','Left slice includes mid so never shrinks','Right half wrong','merge() missing'],
+  'function mergeSort(arr) {\n  if (arr.length <= 1) return arr;\n  const mid = Math.floor(arr.length / 2);\n  const left = mergeSort(arr.slice(0, mid + 1));\n  const right = mergeSort(arr.slice(mid + 1));\n  return merge(left, right);\n}'),
+q('sorting','find-bug','hard','Insertion Index Bug','What is wrong here?','j should start at i-1',['key should be arr[0]','j should start at i-1','while condition wrong','Assignment wrong'],
+  'function insertionSort(arr) {\n  for (let i = 1; i < arr.length; i++) {\n    let key = arr[i], j = i;\n    while (j > 0 && arr[j-1] > key) { arr[j] = arr[j-1]; j--; }\n    arr[j] = key;\n  }\n}'),
+q('sorting','logic','easy','JS Default Sort','What does [10,9,100].sort() return?','[10, 100, 9]',['[9,10,100]','[100,10,9]','[10, 100, 9]','[10,9,100]'],
+  'console.log([10, 9, 100].sort());'),
+q('sorting','logic','easy','Numeric Sort','[3,1,2].sort((a,b)=>a-b)?','[1, 2, 3]',['[3,1,2]','[1, 2, 3]','[3,2,1]','[2,1,3]'],
+  'console.log([3,1,2].sort((a,b)=>a-b));'),
+q('sorting','logic','medium','Descending Sort','[5,2,8].sort((a,b)=>b-a)?','[8, 5, 2]',['[2,5,8]','[8, 5, 2]','[5,2,8]','[8,2,5]'],
+  'console.log([5,2,8].sort((a,b)=>b-a));'),
+q('sorting','logic','medium','Sort by Length','["hi","a","hey"].sort((a,b)=>a.length-b.length)?','["a","hi","hey"]',['["a","hi","hey"]','["hey","hi","a"]','["hi","a","hey"]','["a","hey","hi"]'],
+  'console.log(["hi","a","hey"].sort((a,b)=>a.length-b.length));'),
+q('sorting','logic','medium','Sort Mutates','Does arr.sort() mutate the original array?','Yes',['Yes','No','Only with comparator','Only without comparator']),
+q('sorting','logic','hard','Stable Sort ES2019','Is Array.prototype.sort() stable in ES2019+?','Yes',['No','Yes','Only in Chrome','Only for numbers']),
+q('sorting','logic','hard','Counting Sort Limit','Counting Sort fails on negatives because?','Array indices cannot be negative',['Too slow','Array indices cannot be negative','Only works on strings','Needs O(n²) space']),
+q('sorting','predict-state','medium','Bubble Two Passes','[64,34,25,12] after TWO Bubble Sort passes?','25, 12, 34, 64'),
 
-  // --- TREE ---
-  {
-    category: 'tree',
-    type: 'mcq',
-    difficulty: 'medium',
-    title: 'Traversal Order',
-    description: 'Which tree traversal visits the Left subtree, then the Right subtree, and finally the Root node?',
-    options: ['Inorder', 'Preorder', 'Postorder', 'Level-order'],
-    correctAnswer: 'Postorder'
-  },
-  {
-    category: 'tree',
-    type: 'predict-state',
-    difficulty: 'hard',
-    title: 'BST Deletion Target',
-    description: 'In a standard Binary Search Tree, if you delete a node that has TWO children, what node is typically used to replace it?',
-    options: ['The largest node in the Left subtree OR the smallest node in the Right subtree', 'The immediate parent node', 'The Left child directly', 'The node with the deepest height'],
-    correctAnswer: 'The largest node in the Left subtree OR the smallest node in the Right subtree'
-  },
-  {
-    category: 'tree',
-    type: 'find-bug',
-    difficulty: 'easy',
-    title: 'BST Insert Bug',
-    description: 'Find the bug in this BST insert operation.',
-    codeLanguage: 'typescript',
-    codeSnippet: `1: function insert(root: TreeNode | null, val: number): TreeNode {
-2:   if (!root) return new TreeNode(val);
-3:   if (val < root.val) {
-4:     root.left = insert(root.left, val);
-5:   } else {
-6:     insert(root.right, val); // BUG HERE
-7:   }
-8:   return root;
-9: }`,
-    options: ['Line 2', 'Line 4', 'Line 6', 'Line 8'],
-    correctAnswer: 'Line 6'
-  },
+// ══════ SEARCHING (35) ══════
+q('searching','mcq','easy','BS Prerequisite','What is required before Binary Search?','Array must be sorted',['Must be unique','Array must be sorted','Even length','Positive elements']),
+q('searching','mcq','easy','Linear Worst','Worst-case of Linear Search?','O(n)',['O(1)','O(log n)','O(n)','O(n²)']),
+q('searching','mcq','easy','BS Best Case','Best-case of Binary Search?','O(1)',['O(1)','O(log n)','O(n)','O(n log n)']),
+q('searching','mcq','easy','Linear Best','Best-case of Linear Search?','O(1)',['O(1)','O(log n)','O(n)','O(n²)']),
+q('searching','mcq','medium','BS Worst','Worst-case of Binary Search?','O(log n)',['O(1)','O(log n)','O(n)','O(n log n)']),
+q('searching','mcq','medium','Hash Average','Average hash table lookup?','O(1)',['O(1)','O(log n)','O(n)','O(n²)']),
+q('searching','mcq','medium','Jump Step','Optimal block size in Jump Search?','sqrt(n)',['n/2','log n','sqrt(n)','n/3']),
+q('searching','mcq','medium','BS Iterative Space','Space complexity of iterative BS?','O(1)',['O(1)','O(log n)','O(n)','O(n²)']),
+q('searching','mcq','medium','Exponential Use','Exponential Search is best for?','Unbounded or large sorted arrays',['Unsorted arrays','Unbounded or large sorted arrays','Linked lists','Graphs']),
+q('searching','mcq','hard','Interpolation Best','Interpolation Search best-case?','O(1)',['O(1)','O(log n)','O(log log n)','O(n)']),
+q('searching','mcq','hard','Hash Worst','Worst-case hash table lookup?','O(n)',['O(1)','O(log n)','O(n)','O(n²)']),
+q('searching','mcq','hard','Ternary vs Binary','Ternary Search makes more comparisons per step than Binary Search?','True',['True','False','Same','Depends']),
+q('searching','predict-state','easy','Linear Find 30','Linear search for 30 in [10,20,30,40]. Index?','2'),
+q('searching','predict-state','easy','Linear Not Found','Linear search for 50 in [10,20,30,40]?','-1'),
+q('searching','predict-state','medium','BS First Mid','BS on [2,5,8,12,16,23,38] for 23. First mid index?','3'),
+q('searching','predict-state','medium','BS Steps 16','BS [2,5,8,12,16,23,38] for 16. Comparisons needed?','2'),
+q('searching','predict-state','medium','indexOf 25','[10,20,30].indexOf(25)?','-1'),
+q('searching','predict-state','medium','BS on [1..15] for 13','BS [1..15] for 13. First mid (0-based)?','7'),
+q('searching','predict-state','hard','BS First Occurrence','First occurrence of 3 in [1,2,3,3,3,4,5]?','2'),
+q('searching','predict-state','hard','BS Max Comparisons 1024','Max comparisons in BS on 1024 elements?','10'),
+q('searching','find-bug','medium','Returns Element Not Index','Function returns element instead of index.','Should return i not arr[i]',['Loop wrong','Should return i not arr[i]','Use == not ===','return -1 wrong'],
+  'function linearSearch(arr, target) {\n  for (let i = 0; i < arr.length; i++)\n    if (arr[i] === target) return arr[i];\n  return -1;\n}'),
+q('searching','find-bug','hard','BS Integer Overflow','Classic midpoint overflow. Fix?','Use l + Math.floor((r-l)/2)',['while wrong','Use l + Math.floor((r-l)/2)','r=m-1 should be r=m','return -1 wrong'],
+  'function bs(arr, l, r, x) {\n  while (l <= r) {\n    let m = Math.floor((l + r) / 2);\n    if (arr[m] === x) return m;\n    if (arr[m] < x) l = m + 1; else r = m - 1;\n  } return -1;\n}'),
+q('searching','find-bug','hard','BS Off By One','BS misses target when lo===hi. Fix?','while(lo < hi) should be while(lo <= hi)',['while(lo < hi) should be while(lo <= hi)','mid calc wrong','lo=mid+1 should be lo=mid','hi=mid-1 should be hi=mid'],
+  'function bs(a, t) {\n  let lo=0, hi=a.length-1;\n  while (lo < hi) {\n    const m = lo+Math.floor((hi-lo)/2);\n    if (a[m]===t) return m;\n    if (a[m]<t) lo=m+1; else hi=m-1;\n  } return -1;\n}'),
+q('searching','logic','easy','indexOf Result','[1,3,5,7].indexOf(5)?','2',['5','2','-1','3'],'console.log([1,3,5,7].indexOf(5));'),
+q('searching','logic','easy','includes False','[1,2,3].includes(4)?','false',['true','false','undefined','-1'],'console.log([1,2,3].includes(4));'),
+q('searching','logic','easy','find Method','[5,12,8].find(x=>x>10)?','12',['5','12','8','undefined'],'console.log([5,12,8].find(x=>x>10));'),
+q('searching','logic','medium','findIndex','[10,20,30].findIndex(x=>x>15)?','1',['0','1','2','20'],'console.log([10,20,30].findIndex(x=>x>15));'),
+q('searching','logic','medium','BS Code Output','bs([1,3,5,7,9], 7)?','3',['-1','2','3','7'],
+  'function bs(a,t){let l=0,r=a.length-1;while(l<=r){const m=l+((r-l)>>1);if(a[m]===t)return m;if(a[m]<t)l=m+1;else r=m-1;}return -1;}\nconsole.log(bs([1,3,5,7,9],7));'),
+q('searching','logic','medium','BS Not Found','bs([2,4,6,8], 5)?','-1',['-1','1','2','5'],'console.log(bs([2,4,6,8],5));'),
+q('searching','logic','medium','Two Sum','[2,7,11,15] target=9. Pair?','2 and 7',['2 and 7','2 and 11','7 and 11','No pair']),
+q('searching','logic','hard','Recursive BS Depth','Recursive BS calls to find 1 in [1,2,3,4,5,6,7]?','3',['1','2','3','7']),
+q('searching','logic','hard','Rotated Array','Index of 5 in [4,5,1,2,3]?','1',['0','1','2','4']),
+q('searching','logic','hard','BS Unsigned Shift','Why use (lo+hi)>>>1?','Prevents overflow, returns non-negative int',['Faster','Prevents overflow, returns non-negative int','Rounds up','No difference']),
+q('searching','predict-state','easy','Array find','[5,12,8,130].find(x=>x>10)?','12'),
 
-  // --- DYNAMIC PROGRAMMING ---
-  {
-    category: 'dp',
-    type: 'mcq',
-    difficulty: 'easy',
-    title: 'Core Concept',
-    description: 'What are the two main requirements for a problem to be solvable by Dynamic Programming?',
-    options: ['Greedy Choice and Sorting', 'Optimal Substructure and Overlapping Subproblems', 'Recursion and Graph Cycles', 'Divide and Conquer'],
-    correctAnswer: 'Optimal Substructure and Overlapping Subproblems'
-  },
-  {
-    category: 'dp',
-    type: 'predict-state',
-    difficulty: 'medium',
-    title: 'Fibonacci Array',
-    description: 'If solving Fibonacci using bottom-up DP starting with [0, 1], what are the exact values of the dp array for indices 0 through 5?',
-    correctAnswer: '0, 1, 1, 2, 3, 5'
-  },
-  {
-    category: 'dp',
-    type: 'find-bug',
-    difficulty: 'hard',
-    title: 'Coin Change Logic',
-    description: 'Identify the flaw in this top-down DP approach for the Coin Change problem (minimizing coins).',
-    codeLanguage: 'typescript',
-    codeSnippet: `1: function minCoins(coins: number[], amount: number, memo = {}) {
-2:   if (amount === 0) return 0;
-3:   if (amount < 0) return Infinity;
-4:   if (memo[amount]) return memo[amount];
-5:   
-6:   let min = Infinity;
-7:   for (const coin of coins) {
-8:     min = Math.min(min, 1 + minCoins(coins, amount - coin, memo));
-9:   }
-10:  memo[amount] = min;
-11:  return min;
-12: }`,
-    options: ['Line 3 should return 0', 'Line 4 should check memo[amount] !== undefined', 'Line 8 should be min = 1 + ...', 'There is no bug'],
-    correctAnswer: 'Line 4 should check memo[amount] !== undefined'
-  }
+// ══════ GRAPH (35) ══════
+q('graph','mcq','easy','BFS Structure','BFS uses which data structure?','Queue',['Stack','Queue','Priority Queue','Array']),
+q('graph','mcq','easy','DFS Structure','DFS iterative uses?','Stack',['Queue','Stack','Heap','Linked List']),
+q('graph','mcq','easy','Tree Edges','A tree with n nodes has how many edges?','n - 1',['n','n - 1','n + 1','2n']),
+q('graph','mcq','easy','DAG Meaning','What does DAG stand for?','Directed Acyclic Graph',['Direct Access Graph','Directed Acyclic Graph','Dynamic Array Graph','Directed Adjacent Graph']),
+q('graph','mcq','medium','Dijkstra DS','Dijkstra uses?','Min-Heap / Priority Queue',['Stack','Queue','Min-Heap / Priority Queue','Array']),
+q('graph','mcq','medium','BFS Time','BFS time on adjacency list?','O(V + E)',['O(V)','O(E)','O(V + E)','O(V*E)']),
+q('graph','mcq','medium','DFS Time','DFS time complexity?','O(V + E)',['O(V)','O(V + E)','O(V²)','O(E²)']),
+q('graph','mcq','medium','Dijkstra Fails','Dijkstra fails with?','Negative weight edges',['Undirected graphs','Negative weight edges','Disconnected graphs','Dense graphs']),
+q('graph','mcq','medium','Cycle Detect Directed','Detect cycle in directed graph?','DFS with recursion stack',['BFS only','DFS with recursion stack','Union-Find only','Topological Sort only']),
+q('graph','mcq','hard','Bellman Ford Advantage','Bellman-Ford over Dijkstra?','Handles negative edge weights',['Faster','Handles negative edge weights','Less memory','Undirected only']),
+q('graph','mcq','hard','Floyd-Warshall','Floyd-Warshall solves?','All-pairs shortest paths',['Single-source shortest path','All-pairs shortest paths','MST','Topological ordering']),
+q('graph','mcq','hard','MST Algorithms','Which find MST?','Both Prim and Kruskal',['Only Prim','Only Kruskal','Both Prim and Kruskal','Neither']),
+q('graph','predict-state','easy','BFS Simple','BFS from A: A->B, A->C, B->D. Order?','A, B, C, D'),
+q('graph','predict-state','easy','Path Length','Shortest path A to C in A->B->C?','2'),
+q('graph','predict-state','easy','Degree Count','Node B in undirected {A-B, B-C, B-D}. Degree of B?','3'),
+q('graph','predict-state','medium','DFS Order','DFS from A (alphabetical): A->B, A->C, B->D?','A, B, D, C'),
+q('graph','predict-state','medium','BFS Level','BFS from 1: 1->2,1->3,2->4,3->4. Level of 4?','2'),
+q('graph','predict-state','medium','Topo Sort','Valid topo order: 5->0,5->2,4->0,4->1,2->3,3->1?','5, 4, 2, 3, 1, 0'),
+q('graph','predict-state','medium','BFS Shortest','BFS from S: S->A,S->B,A->T,B->T. Shortest S->T?','2'),
+q('graph','predict-state','hard','Dijkstra Shortest','A->B(1),A->C(4),B->C(2),B->D(6),C->D(1). Shortest A->D?','4'),
+q('graph','predict-state','hard','Kruskal First','Edges (A,B,1),(B,C,3),(A,C,4),(C,D,2). Kruskal picks first?','(A,B,1)'),
+q('graph','find-bug','medium','DFS No Visited','DFS loops on cycles. Why?','No visited set to prevent revisiting',['No visited set to prevent revisiting','Stack should be queue','console.log wrong','Loop wrong'],
+  'function dfs(graph, node) {\n  console.log(node);\n  for (const n of graph[node] || [])\n    dfs(graph, n);\n}'),
+q('graph','find-bug','hard','BFS Duplicate Enqueue','BFS visits nodes multiple times. Fix?','Mark visited when enqueuing, not dequeuing',['Use pop not shift','Mark visited when enqueuing, not dequeuing','Reverse adjacency list','Use priority queue'],
+  'function bfs(graph, start) {\n  const vis = new Set();\n  const queue = [start];\n  while (queue.length) {\n    const n = queue.shift();\n    if (vis.has(n)) continue;\n    vis.add(n);\n    for (const x of graph[n]||[]) queue.push(x);\n  }\n}'),
+q('graph','find-bug','hard','Dijkstra No Compare','Dijkstra updates without checking shorter. Fix?','Must check newDist < dist[v] before updating',['Must check newDist < dist[v] before updating','dist should be Map','Use BFS','PQ wrong'],
+  'for (const [v, w] of graph[u])\n  dist[v] = dist[u] + w;'),
+q('graph','logic','easy','Node Count','Object.keys({A:["B"],B:["C"],C:[]}).length?','3',['1','2','3','4'],'console.log(Object.keys({A:["B"],B:["C"],C:[]}).length);'),
+q('graph','logic','easy','Edge Count','Edges in {A:["B","C"],B:["D"],C:[],D:[]}?','3',['2','3','4','6']),
+q('graph','logic','medium','BFS Output','BFS from A on {A:["B","C"],B:["D"],C:[],D:[]}?','A B C D',['A C B D','A B C D','A B D C','D B C A'],
+  'const g={A:["B","C"],B:["D"],C:[],D:[]};\nconst q=["A"],v=new Set(["A"]),o=[];\nwhile(q.length){const n=q.shift();o.push(n);for(const x of g[n])if(!v.has(x)){v.add(x);q.push(x);}}\nconsole.log(o.join(" "));'),
+q('graph','logic','medium','Indegree','A->B, C->B, D->B. Indegree of B?','3',['0','1','2','3']),
+q('graph','logic','medium','Components','{1:[2],2:[1],3:[4],4:[3],5:[]}. Components?','3',['1','2','3','5']),
+q('graph','logic','medium','Edge Check','In {1:[2,3],2:[3],3:[]}, does edge 3->1 exist?','No',['Yes','No','Error','undefined']),
+q('graph','logic','hard','Bipartite','Graph is bipartite iff no?','Odd-length cycles',['Even cycles','Odd-length cycles','Self-loops','Bridges']),
+q('graph','logic','hard','Adj Matrix Size','Adjacency matrix for n=5 has cells?','25',['5','10','25','50']),
+q('graph','logic','hard','Strongly Connected','Directed graph is strongly connected if?','Every vertex reachable from every other',['No cycles','Every vertex reachable from every other','Is a DAG','Even degree']),
+q('graph','mcq','medium','Adj List vs Matrix','Adjacency list is better for?','Sparse graphs',['Dense graphs','Sparse graphs','Complete graphs','Weighted graphs']),
+
+// ══════ TREE (35) ══════
+q('tree','mcq','easy','BST Left','In BST, left subtree values are?','Less than node',['Greater','Less than node','Equal','Random']),
+q('tree','mcq','easy','Inorder Output','Inorder of BST yields?','Sorted ascending',['Random','Sorted ascending','Reverse sorted','Level order']),
+q('tree','mcq','easy','Max Children','Binary tree node has at most?','2 children',['1','2 children','3','Unlimited']),
+q('tree','mcq','easy','Leaf Node','Leaf node has how many children?','0',['0','1','2','n']),
+q('tree','mcq','medium','Postorder','Postorder visits?','Left Right Root',['Root Left Right','Left Root Right','Left Right Root','Right Left Root']),
+q('tree','mcq','medium','Preorder','Preorder visits?','Root Left Right',['Root Left Right','Left Root Right','Left Right Root','Right Left Root']),
+q('tree','mcq','medium','BST Avg Search','Balanced BST average search?','O(log n)',['O(1)','O(log n)','O(n)','O(n log n)']),
+q('tree','mcq','medium','Full Binary','Full binary tree: every node has?','0 or 2 children',['Exactly 2','0 or 2 children','At least 1','Exactly 1']),
+q('tree','mcq','medium','Complete Binary','Complete binary tree?','All levels full except last, left-filled',['All leaves same depth','All levels full except last, left-filled','Every node has 2','Height always log n']),
+q('tree','mcq','medium','Max Nodes Level k','Max nodes at level k in binary tree?','2^k',['k','2k','2^k','k²']),
+q('tree','mcq','hard','AVL LR Fix','LR imbalance in AVL requires?','Left rotate child then right rotate root',['Single left','Single right','Left rotate child then right rotate root','Right rotate child then left rotate root']),
+q('tree','mcq','hard','RB Root Color','Red-Black tree root is always?','Black',['Red','Black','Either','Alternating']),
+q('tree','mcq','hard','BST Worst Search','Worst search in skewed BST?','O(n)',['O(1)','O(log n)','O(n)','O(n log n)']),
+q('tree','predict-state','easy','BST Min','Find min in BST: follow?','Leftmost path'),
+q('tree','predict-state','easy','BST Max','Find max in BST: follow?','Rightmost path'),
+q('tree','predict-state','medium','Inorder 5,3,7,1,4','Insert 5,3,7,1,4 into BST. Inorder?','1, 3, 4, 5, 7'),
+q('tree','predict-state','medium','Preorder Example','Preorder: root=1, left=2(4,5), right=3?','1, 2, 4, 5, 3'),
+q('tree','predict-state','medium','Postorder Example','Postorder: root=1, left=2(4,5), right=3?','4, 5, 2, 3, 1'),
+q('tree','predict-state','medium','Level Order','Level order: root=1, L=2, R=3, 2.L=4, 2.R=5?','1, 2, 3, 4, 5'),
+q('tree','predict-state','hard','Delete 2 Children','Delete node with 2 children: replace with?','Inorder successor (smallest in right subtree)'),
+q('tree','predict-state','hard','Height Calc','Root(1)->L(2)->L(4), Root(1)->R(3). Height?','2'),
+q('tree','find-bug','easy','BST Insert No Assign','Right insert missing assignment.','Add root.right = insert(root.right, val)',['Condition wrong','Add root.right = insert(root.right, val)','Base case wrong','Return wrong'],
+  'function insert(root, val) {\n  if (!root) return {val, left:null, right:null};\n  if (val < root.val) root.left = insert(root.left, val);\n  else insert(root.right, val);\n  return root;\n}'),
+q('tree','find-bug','medium','Inorder is Preorder','Prints preorder not inorder. Fix?','Move console.log between left and right calls',['Base case wrong','Move console.log between left and right calls','Right before left','Use iteration'],
+  'function inorder(n) {\n  if (!n) return;\n  console.log(n.val);\n  inorder(n.left);\n  inorder(n.right);\n}'),
+q('tree','find-bug','hard','PathSum Non-Leaf','Returns true for non-leaf. Fix?','Check node is leaf: !node.left && !node.right',['Target wrong','Check node is leaf: !node.left && !node.right','Use && not ||','Base return true'],
+  'function hasPathSum(n, t) {\n  if (!n) return false;\n  if (n.val === t) return true;\n  return hasPathSum(n.left,t-n.val)||hasPathSum(n.right,t-n.val);\n}'),
+q('tree','logic','easy','Root Value','root={val:5}; root.val?','5',['undefined','5','null','{}'],'const root={val:5}; console.log(root.val);'),
+q('tree','logic','easy','Left Child','root={val:5,left:{val:3}}; root.left.val?','3',['5','3','undefined','null'],'console.log({val:5,left:{val:3}}.left.val);'),
+q('tree','logic','medium','Inorder Code','Inorder of BST(3, L=1, R=5)?','[1, 3, 5]',['[3,1,5]','[1, 3, 5]','[5,3,1]','[1,5,3]'],
+  'class N{constructor(v,l=null,r=null){this.v=v;this.l=l;this.r=r}}\nconst root=new N(3,new N(1),new N(5));\nconst res=[];function io(n){if(!n)return;io(n.l);res.push(n.v);io(n.r);}\nio(root);console.log(res);'),
+q('tree','logic','medium','Height Single Node','Height of root-only tree?','0',['-1','0','1','null'],
+  'function h(n){if(!n)return -1;return 1+Math.max(h(n.left),h(n.right));}\nconsole.log(h({val:1,left:null,right:null}));'),
+q('tree','logic','medium','Leaf Count','Root(1)->L(2),R(3). Both are leaves. Count?','2',['0','1','2','3']),
+q('tree','logic','medium','LCA BST','LCA of 2 and 4 in BST root=3, L=2, R=4?','3',['2','3','4','null']),
+q('tree','logic','hard','Contains 4','BST {5,L:3,R:7}. contains(4)?','false',['true','false','undefined','null']),
+q('tree','logic','hard','Mirror Condition','Trees are mirrors if?','Left of one = right of other recursively',['Same values','Left of one = right of other recursively','Same height','Same count']),
+q('tree','logic','hard','Balanced Diff','Balanced tree max subtree height diff?','1',['0','1','2','log n']),
+
+// ══════ DP (35) ══════
+q('dp','mcq','easy','DP Properties','DP requires?','Optimal substructure + overlapping subproblems',['Greedy + sorting','Optimal substructure + overlapping subproblems','Recursion + BFS','Divide and conquer']),
+q('dp','mcq','easy','Tabulation','Tabulation is?','Bottom-up',['Top-down','Bottom-up','Left-right','Random']),
+q('dp','mcq','easy','Memoization','Memoization is?','Top-down',['Top-down','Bottom-up','Both','Neither']),
+q('dp','mcq','easy','Naive Fib','Naive recursive Fibonacci time?','O(2^n)',['O(n)','O(n²)','O(2^n)','O(log n)']),
+q('dp','mcq','medium','Knapsack Time','0/1 Knapsack time, n items capacity W?','O(nW)',['O(n)','O(nW)','O(2^n)','O(n²)']),
+q('dp','mcq','medium','Fib DP Time','Fibonacci with DP?','O(n)',['O(1)','O(n)','O(n²)','O(2^n)']),
+q('dp','mcq','medium','Fib Optimized Space','Fibonacci DP optimized space?','O(1)',['O(1)','O(n)','O(n²)','O(log n)']),
+q('dp','mcq','medium','DP vs Greedy','Key difference: DP explores all; Greedy makes?','Locally optimal choices',['Global optimal','Locally optimal choices','Random','No choices']),
+q('dp','mcq','medium','Longest Path DAG','Longest path in DAG uses?','Topological sort + DP',['BFS','Dijkstra','Topological sort + DP','Brute force']),
+q('dp','mcq','hard','LCS Time','LCS of strings m and n?','O(mn)',['O(m+n)','O(mn)','O(2^(m+n))','O(m²)']),
+q('dp','mcq','hard','Edit Dist Ops','Levenshtein allows?','Insert Delete Replace',['Insert only','Insert Delete','Insert Delete Replace','Insert Delete Replace Swap']),
+q('dp','mcq','hard','Matrix Chain','Matrix chain minimizes?','Scalar multiplications',['Matrix size','Scalar multiplications','Memory','Rank']),
+q('dp','predict-state','easy','Fib Table','DP fib(0) to fib(5)?','0, 1, 1, 2, 3, 5'),
+q('dp','predict-state','easy','Fib 6 Value','fib(6)?','8'),
+q('dp','predict-state','medium','Coins [1,3,4] amt 6','Min coins for 6 using [1,3,4]?','2'),
+q('dp','predict-state','medium','Stairs 4','Ways to climb 4 stairs (1 or 2 steps)?','5'),
+q('dp','predict-state','medium','Stairs 5','Ways to climb 5 stairs?','8'),
+q('dp','predict-state','medium','Kadane','Max subarray [-2,1,-3,4,-1,2,1,-5,4]?','6'),
+q('dp','predict-state','medium','Edit Dist cat-cut','Edit distance "cat" to "cut"?','1'),
+q('dp','predict-state','hard','LCS ABCBDAB BDCAB','LCS length?','4'),
+q('dp','predict-state','hard','Edit Dist kitten-sitting','Edit distance?','3'),
+q('dp','predict-state','hard','Knapsack W5','W=5, items (w=2,v=3),(w=3,v=4),(w=4,v=5). Max?','7'),
+q('dp','find-bug','medium','Fib Init Bug','dp[1] never set to 1.','Add dp[1] = 1',['Start at 1','Add dp[1] = 1','Loop start wrong','fill(1) not fill(0)'],
+  'function fib(n) {\n  const dp = new Array(n+1).fill(0);\n  for (let i = 2; i <= n; i++) dp[i] = dp[i-1] + dp[i-2];\n  return dp[n];\n}'),
+q('dp','find-bug','hard','Memo Falsy','Memo check fails for cached 0. Why?','if(memo[n]) is falsy for 0; use !== undefined',['Base wrong','if(memo[n]) is falsy for 0; use !== undefined','Return wrong','Use array'],
+  'function fib(n, memo={}) {\n  if (n<=1) return n;\n  if (memo[n]) return memo[n];\n  return memo[n] = fib(n-1,memo) + fib(n-2,memo);\n}'),
+q('dp','find-bug','hard','Grid Key Collision','Memo key r+c: (1,2) and (2,1) collide.','Use template string key like r+","+c',['Base wrong','Use template string key like r+","+c','Formula wrong','Use Map'],
+  'function paths(r,c,memo={}) {\n  const key = r + c;\n  if (memo[key] !== undefined) return memo[key];\n  if (r===0||c===0) return 1;\n  return memo[key] = paths(r-1,c,memo) + paths(r,c-1,memo);\n}'),
+q('dp','logic','easy','Fib Code','fib(6) with tabulation?','8',['5','6','8','13'],
+  'function fib(n){const d=[0,1];for(let i=2;i<=n;i++)d[i]=d[i-1]+d[i-2];return d[n];}\nconsole.log(fib(6));'),
+q('dp','logic','easy','Kadane Simple','Max subarray [1,2,3]?','6',['1','3','5','6']),
+q('dp','logic','medium','Coin 11','coinChange([1,2,5], 11)?','3',['2','3','4','11'],
+  'function cc(c,a){const d=Array(a+1).fill(Infinity);d[0]=0;for(let i=1;i<=a;i++)for(const x of c)if(x<=i)d[i]=Math.min(d[i],d[i-x]+1);return d[a];}\nconsole.log(cc([1,2,5],11));'),
+q('dp','logic','medium','LCS ABC AC','LCS length of "ABC" and "AC"?','2',['1','2','3','0']),
+q('dp','logic','medium','Grid 2x3','Unique paths 2x3 grid?','3',['2','3','4','6']),
+q('dp','logic','medium','Grid 3x3','Unique paths 3x3?','6',['3','4','6','9']),
+q('dp','logic','hard','Knapsack Max','Weights [2,3,4], vals [3,4,5], cap 5?','7',['5','7','9','12']),
+q('dp','logic','hard','House Robber','Max from [1,2,3,1] no adjacent?','4',['3','4','5','6']),
+q('dp','logic','hard','Matrix Chain 3','A(10x30)B(30x5)C(5x60). Min mults?','4500',['1500','4500','9000','18000']),
+
+// ══════ LOGIC (35) ══════
+q('logic','logic','easy','typeof NaN','typeof NaN?','number',['NaN','number','undefined','object']),
+q('logic','logic','easy','typeof null','typeof null?','object',['null','undefined','object','boolean']),
+q('logic','logic','easy','Var Hoisting','console.log(x); var x=5;','undefined',['5','undefined','Error','null'],'console.log(x); var x = 5;'),
+q('logic','logic','easy','Post Increment','let x=5; console.log(x++);','5',['5','6','Error','undefined'],'let x=5; console.log(x++);'),
+q('logic','logic','easy','Map Double','[1,2,3].map(x=>x*2)?','[2, 4, 6]',['[1,2,3]','[2, 4, 6]','6','undefined']),
+q('logic','logic','easy','Length Clear','a=[1,2,3]; a.length=0; a?','[]',['[1,2,3]','[]','Error','null']),
+q('logic','logic','easy','AND null','null && "Hello"?','null',['null','"Hello"','false','undefined'],'console.log(null && "Hello");'),
+q('logic','logic','easy','includes String','"Hello".includes("ell")?','true',['true','false','1','undefined']),
+q('logic','logic','medium','[] == ![]','[] == ![] in JS?','true',['true','false','TypeError','undefined'],'console.log([] == ![]);'),
+q('logic','logic','medium','Destructuring','const {x,...rest} = {x:1,a:2,b:3}; rest?','{ a: 2, b: 3 }',['[2,3]','{ a: 2, b: 3 }','undefined','Error'],'const {x,...rest}={x:1,a:2,b:3}; console.log(rest);'),
+q('logic','logic','medium','Object Key','a[{}]=1; a[{}]=2; a[{}]?','2',['1','2','undefined','Error'],'const a={}; a[{}]=1; a[{}]=2; console.log(a[{}]);'),
+q('logic','logic','medium','Double Bang','!!"" returns?','false',['true','false','""','undefined']),
+q('logic','logic','medium','Set Size','new Set([1,1,2,2,3]).size?','3',['5','3','2','1']),
+q('logic','logic','medium','OR Short Circuit','"" || "Default"?','Default',['""','Default','null','undefined'],'console.log("" || "Default");'),
+q('logic','logic','medium','parseInt Map','["1","2","3"].map(parseInt)?','[1, NaN, NaN]',['[1,2,3]','[1, NaN, NaN]','[NaN,NaN,NaN]','Error'],'console.log(["1","2","3"].map(parseInt));'),
+q('logic','logic','medium','Const Reassign','const x=5; x=10?','TypeError',['10','TypeError','ReferenceError','undefined']),
+q('logic','logic','medium','Spread Override','{...{a:1},...{a:2}}?','{ a: 2 }',['{ a: 1 }','{ a: 2 }','Error','{ a: 1, a: 2 }'],'console.log({...{a:1},...{a:2}});'),
+q('logic','logic','medium','Division by Zero','1/0 in JS?','Infinity',['0','NaN','Infinity','Error']),
+q('logic','logic','medium','Splice vs Slice','Which mutates original?','splice',['slice','splice','Both','Neither']),
+q('logic','logic','medium','Nullish Coalescing','null ?? "hi"?','hi',['null','hi','undefined','false'],'console.log(null ?? "hi");'),
+q('logic','logic','medium','NaN equality','NaN === NaN?','false',['true','false','NaN','Error'],'console.log(NaN === NaN);'),
+q('logic','logic','medium','void 0','void 0 returns?','undefined',['0','null','undefined','NaN']),
+q('logic','logic','hard','Event Loop','log A; setTimeout B 0; Promise C. Order?','A, C, B',['A, B, C','A, C, B','B, A, C','C, A, B'],
+  'console.log("A");\nsetTimeout(()=>console.log("B"),0);\nPromise.resolve().then(()=>console.log("C"));'),
+q('logic','logic','hard','Closure Counter','counter factory: c1(), c2()?','1, 1',['1, 2','1, 1','0, 0','2, 2'],
+  'function counter(){let c=0;return()=>++c;}\nconst c1=counter(),c2=counter();\nconsole.log(c1(),c2());'),
+q('logic','logic','hard','bind Chain','f.bind({v:"A"}).bind({v:"B"})()?','A',['A','B','undefined','Error'],
+  'function f(){return this.v;}\nconsole.log(f.bind({v:"A"}).bind({v:"B"})());'),
+q('logic','logic','hard','Regex Case','/a/.test("A")?','false',['true','false','Error','null'],'console.log(/a/.test("A"));'),
+q('logic','logic','hard','Arrow this','Arrow functions get this from?','Enclosing lexical scope',['Own context','Enclosing lexical scope','Global always','undefined always']),
+q('logic','logic','hard','Reduce Object','["a","b"].reduce((o,c)=>({...o,[c]:1}),{})?','{ a: 1, b: 1 }',['["a","b"]','{ a: 1, b: 1 }','{}','Error'],
+  'console.log(["a","b"].reduce((o,c)=>({...o,[c]:1}),{}));'),
+q('logic','logic','hard','Prototype Chain','Property not on obj: JS looks at?','Prototype chain',['Global scope','Prototype chain','Returns error','undefined immediately']),
+q('logic','logic','hard','async Returns','async function returns?','A Promise',['Direct value','undefined','A Promise','A callback']),
+q('logic','logic','hard','WeakMap Keys','WeakMap keys must be?','Objects',['Strings','Numbers','Objects','Any type']),
+q('logic','logic','hard','Symbol Unique','Symbol("a") === Symbol("a")?','false',['true','false','Error','undefined'],'console.log(Symbol("a") === Symbol("a"));'),
+q('logic','logic','medium','Optional Chaining','({a:{b:1}})?.a?.b?','1',['undefined','1','null','Error'],'console.log(({a:{b:1}})?.a?.b);'),
+q('logic','logic','medium','JSON Parse Bad','JSON.parse("{a:1}")?','Throws SyntaxError',['Returns {a:1}','Throws SyntaxError','null','undefined']),
+q('logic','logic','easy','Python Reverse','[::-1] on [1,2,3]?','[3, 2, 1]',['[1,2,3]','[3, 2, 1]','[]','Error']),
+
 ];
 
 async function seed() {
   console.log('🌱 Connecting to database...');
-  await mongoose.connect(env.MONGO_URI);
+  await mongoose.connect(env.MONGODB_URI);
   console.log('✅ Connected to MongoDB');
-
   console.log('🗑️  Clearing existing questions...');
   await Question.deleteMany({});
-  
-  console.log(\`📦 Seeding \${questions.length} questions...\`);
+  console.log(`📦 Seeding ${questions.length} questions...`);
   try {
     const result = await Question.insertMany(questions);
-    console.log(\`✅ Successfully inserted \${result.length} questions.\`);
+    console.log(`✅ Successfully inserted ${result.length} questions.`);
+    const summary: Record<string, Record<string, number>> = {};
+    for (const qObj of questions) {
+      if (!summary[qObj.category]) summary[qObj.category] = {};
+      summary[qObj.category][qObj.type] = (summary[qObj.category][qObj.type] || 0) + 1;
+    }
+    console.log('\n📊 Question distribution:');
+    for (const [cat, types] of Object.entries(summary)) {
+      const total = Object.values(types).reduce((a, b) => a + b, 0);
+      const bd = Object.entries(types).map(([t, n]) => `${t}×${n}`).join(', ');
+      console.log(`  ${cat.padEnd(12)} ${total} questions  (${bd})`);
+    }
   } catch (error) {
     console.error('❌ Seeding failed:', error);
   } finally {
-    console.log('🔌 Disconnecting...');
+    console.log('\n🔌 Disconnecting...');
     await mongoose.disconnect();
     process.exit(0);
   }
 }
-
 seed();

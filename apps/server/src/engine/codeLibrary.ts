@@ -749,5 +749,414 @@ def dijkstra(graph, start):
     }
     return L[m][n];
 }`
+  },
+  'prims': {
+    cpp: `void primMST(vector<vector<pair<int,int>>>& adj, int V) {
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+    vector<int> key(V, INT_MAX);
+    vector<int> parent(V, -1);
+    vector<bool> inMST(V, false);
+    
+    pq.push({0, 0});
+    key[0] = 0;
+    
+    while (!pq.empty()) {
+        int u = pq.top().second;
+        pq.pop();
+        if (inMST[u]) continue;
+        inMST[u] = true;
+        
+        for (auto x : adj[u]) {
+            int v = x.first;
+            int weight = x.second;
+            if (inMST[v] == false && key[v] > weight) {
+                key[v] = weight;
+                pq.push({key[v], v});
+                parent[v] = u;
+            }
+        }
+    }
+}`,
+    java: `class Solution {
+    void primMST(List<List<Node>> adj, int V) {
+        PriorityQueue<Node> pq = new PriorityQueue<>(V, new Node());
+        int[] key = new int[V];
+        int[] parent = new int[V];
+        boolean[] inMST = new boolean[V];
+        Arrays.fill(key, Integer.MAX_VALUE);
+        Arrays.fill(parent, -1);
+        
+        pq.add(new Node(0, 0));
+        key[0] = 0;
+        
+        while (!pq.isEmpty()) {
+            int u = pq.poll().node;
+            if (inMST[u]) continue;
+            inMST[u] = true;
+            
+            for (Node e : adj.get(u)) {
+                int v = e.node;
+                int weight = e.cost;
+                if (!inMST[v] && key[v] > weight) {
+                    key[v] = weight;
+                    pq.add(new Node(v, key[v]));
+                    parent[v] = u;
+                }
+            }
+        }
+    }
+}`,
+    python: `import heapq
+def primMST(graph, V):
+    key = [float('inf')] * V
+    parent = [-1] * V
+    inMST = [False] * V
+    
+    pq = [(0, 0)]
+    key[0] = 0
+    
+    while pq:
+        weight, u = heapq.heappop(pq)
+        if inMST[u]: continue
+        inMST[u] = True
+        
+        for v, w in graph[u]:
+            if not inMST[v] and key[v] > w:
+                key[v] = w
+                parent[v] = u
+                heapq.heappush(pq, (key[v], v))`,
+    javascript: `function primMST(graph, V) {
+    const key = new Array(V).fill(Infinity);
+    const parent = new Array(V).fill(-1);
+    const inMST = new Array(V).fill(false);
+    
+    const pq = [[0, 0]]; // Min-heap simulated
+    key[0] = 0;
+    
+    while (pq.length > 0) {
+        pq.sort((a, b) => a[0] - b[0]);
+        const [weight, u] = pq.shift();
+        if (inMST[u]) continue;
+        inMST[u] = true;
+        
+        for (const [v, w] of graph[u]) {
+            if (!inMST[v] && key[v] > w) {
+                key[v] = w;
+                parent[v] = u;
+                pq.push([key[v], v]);
+            }
+        }
+    }
+    return parent;
+}`
+  },
+  'kruskals': {
+    cpp: `struct Edge { int src, dest, weight; };
+int find(vector<int>& parent, int i) {
+    if (parent[i] == -1) return i;
+    return parent[i] = find(parent, parent[i]);
+}
+void Union(vector<int>& parent, int x, int y) {
+    int xset = find(parent, x);
+    int yset = find(parent, y);
+    if (xset != yset) parent[xset] = yset;
+}
+void kruskalMST(vector<Edge>& edges, int V) {
+    sort(edges.begin(), edges.end(), [](Edge a, Edge b) { return a.weight < b.weight; });
+    vector<int> parent(V, -1);
+    for (auto edge : edges) {
+        int x = find(parent, edge.src);
+        int y = find(parent, edge.dest);
+        if (x != y) {
+            Union(parent, x, y);
+        }
+    }
+}`,
+    java: `class Solution {
+    class Edge implements Comparable<Edge> {
+        int src, dest, weight;
+        public int compareTo(Edge compareEdge) {
+            return this.weight - compareEdge.weight;
+        }
+    }
+    int find(int[] parent, int i) {
+        if (parent[i] == -1) return i;
+        return parent[i] = find(parent, parent[i]);
+    }
+    void union(int[] parent, int x, int y) {
+        int xset = find(parent, x);
+        int yset = find(parent, y);
+        if (xset != yset) parent[xset] = yset;
+    }
+    void kruskalMST(Edge[] edges, int V) {
+        Arrays.sort(edges);
+        int[] parent = new int[V];
+        Arrays.fill(parent, -1);
+        for (Edge edge : edges) {
+            int x = find(parent, edge.src);
+            int y = find(parent, edge.dest);
+            if (x != y) {
+                union(parent, x, y);
+            }
+        }
+    }
+}`,
+    python: `class Graph:
+    def find(self, parent, i):
+        if parent[i] == -1: return i
+        return self.find(parent, parent[i])
+    def union(self, parent, x, y):
+        xset = self.find(parent, x)
+        yset = self.find(parent, y)
+        if xset != yset:
+            parent[xset] = yset
+    def kruskalMST(self, edges, V):
+        edges = sorted(edges, key=lambda item: item[2])
+        parent = [-1] * V
+        for u, v, w in edges:
+            x = self.find(parent, u)
+            y = self.find(parent, v)
+            if x != y:
+                self.union(parent, x, y)`,
+    javascript: `function find(parent, i) {
+    if (parent[i] === -1) return i;
+    return parent[i] = find(parent, parent[i]);
+}
+function merge(parent, x, y) {
+    let xset = find(parent, x);
+    let yset = find(parent, y);
+    if (xset !== yset) parent[xset] = yset;
+}
+function kruskalMST(edges, V) {
+    edges.sort((a, b) => a[2] - b[2]);
+    const parent = new Array(V).fill(-1);
+    for (const [u, v, w] of edges) {
+        let x = find(parent, u);
+        let y = find(parent, v);
+        if (x !== y) {
+            merge(parent, x, y);
+        }
+    }
+}`
+  },
+  'bellman-ford': {
+    cpp: `void bellmanFord(vector<Edge>& edges, int V, int src) {
+    vector<int> dist(V, INT_MAX);
+    dist[src] = 0;
+    
+    for (int i = 1; i <= V - 1; i++) {
+        for (auto edge : edges) {
+            int u = edge.src;
+            int v = edge.dest;
+            int weight = edge.weight;
+            if (dist[u] != INT_MAX && dist[u] + weight < dist[v])
+                dist[v] = dist[u] + weight;
+        }
+    }
+    
+    for (auto edge : edges) {
+        if (dist[edge.src] != INT_MAX && dist[edge.src] + edge.weight < dist[edge.dest]) {
+            cout << "Graph contains negative weight cycle";
+            return;
+        }
+    }
+}`,
+    java: `class Solution {
+    void bellmanFord(Edge[] edges, int V, int src) {
+        int[] dist = new int[V];
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        dist[src] = 0;
+        
+        for (int i = 1; i < V; i++) {
+            for (Edge edge : edges) {
+                if (dist[edge.src] != Integer.MAX_VALUE && dist[edge.src] + edge.weight < dist[edge.dest])
+                    dist[edge.dest] = dist[edge.src] + edge.weight;
+            }
+        }
+        
+        for (Edge edge : edges) {
+            if (dist[edge.src] != Integer.MAX_VALUE && dist[edge.src] + edge.weight < dist[edge.dest]) {
+                System.out.println("Graph contains negative weight cycle");
+                return;
+            }
+        }
+    }
+}`,
+    python: `def bellman_ford(edges, V, src):
+    dist = [float("Inf")] * V
+    dist[src] = 0
+    
+    for _ in range(V - 1):
+        for u, v, w in edges:
+            if dist[u] != float("Inf") and dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                
+    for u, v, w in edges:
+        if dist[u] != float("Inf") and dist[u] + w < dist[v]:
+            print("Graph contains negative weight cycle")
+            return`,
+    javascript: `function bellmanFord(edges, V, src) {
+    const dist = new Array(V).fill(Infinity);
+    dist[src] = 0;
+    
+    for (let i = 0; i < V - 1; i++) {
+        for (const [u, v, w] of edges) {
+            if (dist[u] !== Infinity && dist[u] + w < dist[v]) {
+                dist[v] = dist[u] + w;
+            }
+        }
+    }
+    
+    for (const [u, v, w] of edges) {
+        if (dist[u] !== Infinity && dist[u] + w < dist[v]) {
+            console.log("Graph contains negative weight cycle");
+            return;
+        }
+    }
+    return dist;
+}`
+  },
+  'floyd-warshall': {
+    cpp: `void floydWarshall(vector<vector<int>>& dist, int V) {
+    for (int k = 0; k < V; k++) {
+        for (int i = 0; i < V; i++) {
+            for (int j = 0; j < V; j++) {
+                if (dist[i][k] != INT_MAX && dist[k][j] != INT_MAX && dist[i][k] + dist[k][j] < dist[i][j])
+                    dist[i][j] = dist[i][k] + dist[k][j];
+            }
+        }
+    }
+}`,
+    java: `class Solution {
+    void floydWarshall(int[][] dist, int V) {
+        for (int k = 0; k < V; k++) {
+            for (int i = 0; i < V; i++) {
+                for (int j = 0; j < V; j++) {
+                    if (dist[i][k] != Integer.MAX_VALUE && dist[k][j] != Integer.MAX_VALUE && dist[i][k] + dist[k][j] < dist[i][j]) {
+                        dist[i][j] = dist[i][k] + dist[k][j];
+                    }
+                }
+            }
+        }
+    }
+}`,
+    python: `def floyd_warshall(dist, V):
+    for k in range(V):
+        for i in range(V):
+            for j in range(V):
+                if dist[i][k] != float('inf') and dist[k][j] != float('inf'):
+                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])`,
+    javascript: `function floydWarshall(dist, V) {
+    for (let k = 0; k < V; k++) {
+        for (let i = 0; i < V; i++) {
+            for (let j = 0; j < V; j++) {
+                if (dist[i][k] !== Infinity && dist[k][j] !== Infinity && dist[i][k] + dist[k][j] < dist[i][j]) {
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                }
+            }
+        }
+    }
+    return dist;
+}`
+  },
+  'a-star': {
+    cpp: `// A* uses a heuristic distance (h) to guide Dijkstra's search
+void aStar(vector<vector<pair<int,int>>>& adj, vector<int>& h, int V, int src, int target) {
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+    vector<int> g(V, INT_MAX);
+    vector<int> f(V, INT_MAX);
+    
+    g[src] = 0;
+    f[src] = h[src];
+    pq.push({f[src], src});
+    
+    while (!pq.empty()) {
+        int u = pq.top().second;
+        pq.pop();
+        
+        if (u == target) return; // Path found
+        
+        for (auto x : adj[u]) {
+            int v = x.first;
+            int weight = x.second;
+            
+            if (g[u] + weight < g[v]) {
+                g[v] = g[u] + weight;
+                f[v] = g[v] + h[v];
+                pq.push({f[v], v});
+            }
+        }
+    }
+}`,
+    java: `class Solution {
+    void aStar(List<List<Node>> adj, int[] h, int V, int src, int target) {
+        PriorityQueue<Node> pq = new PriorityQueue<>(V, new Node());
+        int[] g = new int[V];
+        int[] f = new int[V];
+        Arrays.fill(g, Integer.MAX_VALUE);
+        Arrays.fill(f, Integer.MAX_VALUE);
+        
+        g[src] = 0;
+        f[src] = h[src];
+        pq.add(new Node(src, f[src]));
+        
+        while (!pq.isEmpty()) {
+            int u = pq.poll().node;
+            if (u == target) return;
+            
+            for (Node e : adj.get(u)) {
+                int v = e.node;
+                int weight = e.cost;
+                if (g[u] + weight < g[v]) {
+                    g[v] = g[u] + weight;
+                    f[v] = g[v] + h[v];
+                    pq.add(new Node(v, f[v]));
+                }
+            }
+        }
+    }
+}`,
+    python: `import heapq
+def a_star(graph, h, V, src, target):
+    g = {node: float('inf') for node in graph}
+    f = {node: float('inf') for node in graph}
+    
+    g[src] = 0
+    f[src] = h[src]
+    pq = [(f[src], src)]
+    
+    while pq:
+        _, u = heapq.heappop(pq)
+        if u == target: return
+        
+        for v, w in graph[u].items():
+            if g[u] + w < g[v]:
+                g[v] = g[u] + w
+                f[v] = g[v] + h[v]
+                heapq.heappush(pq, (f[v], v))`,
+    javascript: `function aStar(graph, heuristics, V, src, target) {
+    const g = {}, f = {};
+    for (let node in graph) { g[node] = Infinity; f[node] = Infinity; }
+    
+    g[src] = 0;
+    f[src] = heuristics[src] || 0;
+    const pq = [[f[src], src]];
+    
+    while (pq.length > 0) {
+        pq.sort((a, b) => a[0] - b[0]);
+        const [_, u] = pq.shift();
+        
+        if (u === target) return g;
+        
+        for (const [v, w] of graph[u]) {
+            if (g[u] + w < g[v]) {
+                g[v] = g[u] + w;
+                f[v] = g[v] + (heuristics[v] || 0);
+                pq.push([f[v], v]);
+            }
+        }
+    }
+    return g;
+}`
   }
 };
