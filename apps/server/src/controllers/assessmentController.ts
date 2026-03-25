@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth.js';
 import { Question } from '../models/Question.js';
 import { AssessmentSession } from '../models/AssessmentSession.js';
+import User from '../models/User.js';
 
 export const startAssessment = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -151,6 +152,89 @@ export const submitAssessment = async (req: AuthRequest, res: Response): Promise
     session.total = session.questionIds.length;
     session.markModified('answers');
     await session.save();
+
+    // ── Update user profile stats ──
+    if (req.userId) {
+      try {
+        const user = await User.findById(req.userId);
+        if (user) {
+          const total = session.questionIds.length;
+          const percentage = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
+          // Increment testsPassed
+          user.profileStats.testsPassed = (user.profileStats.testsPassed || 0) + 1;
+
+          // Recalculate accuracy as rolling average across all quiz totals
+          const allSessions = await AssessmentSession.find({
+            userId: req.userId,
+            submittedAt: { $exists: true }
+          });
+          const totalCorrect = allSessions.reduce((sum, s) => sum + (s.score || 0), 0);
+          const totalQs = allSessions.reduce((sum, s) => sum + (s.total || 0), 0);
+          user.profileStats.accuracy = totalQs > 0 ? Math.round((totalCorrect / totalQs) * 100) : 0;
+
+          // Update categoryProgress
+          const catName = session.category;
+          const catColors: Record<string, string> = {
+            sorting: '#6366f1',
+            graphs: '#22d3ee',
+            trees: '#34d399',
+            searching: '#f59e0b',
+            'dynamic-programming': '#a78bfa',
+            backtracking: '#fb7185',
+          };
+          const existingCat = user.categoryProgress.find(c => c.name === catName);
+          if (existingCat) {
+            existingCat.completed += correctCount;
+            existingCat.total += total;
+          } else {
+            user.categoryProgress.push({
+              name: catName,
+              completed: correctCount,
+              total,
+              color: catColors[catName] || '#6366f1',
+            });
+          }
+
+          // Add activity entry
+          user.activity.push({
+            icon: '📝',
+            text: `Completed ${catName} quiz — ${correctCount}/${total} (${percentage}%)`,
+            date: now,
+          });
+          // Keep activity to last 30 entries
+          if (user.activity.length > 30) {
+            user.activity = user.activity.slice(-30);
+          }
+
+          // Check for streak update (if last activity was yesterday)
+          const yesterday = new Date(now);
+          yesterday.setDate(yesterday.getDate() - 1);
+          const lastActivity = user.activity.length > 1
+            ? user.activity[user.activity.length - 2]?.date
+            : null;
+          if (lastActivity) {
+            const lastDate = new Date(lastActivity);
+            const isSameDay = lastDate.toDateString() === now.toDateString();
+            const isYesterday = lastDate.toDateString() === yesterday.toDateString();
+            if (!isSameDay && isYesterday) {
+              user.profileStats.currentStreak = (user.profileStats.currentStreak || 0) + 1;
+            } else if (!isSameDay && !isYesterday) {
+              user.profileStats.currentStreak = 1;
+            }
+          } else {
+            user.profileStats.currentStreak = 1;
+          }
+
+          user.markModified('profileStats');
+          user.markModified('categoryProgress');
+          user.markModified('activity');
+          await user.save();
+        }
+      } catch (statErr) {
+        console.error('Failed to update user profile stats after quiz:', statErr);
+      }
+    }
 
     res.json({
       sessionId: session._id,

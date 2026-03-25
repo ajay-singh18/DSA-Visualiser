@@ -8,6 +8,7 @@ import AssessmentQuiz from './pages/AssessmentQuiz';
 import AssessmentResults from './pages/AssessmentResults';
 import RaceMode from './pages/RaceMode';
 import Landing from './pages/Landing';
+import Profile from './pages/Profile';
 import DocsHub from './pages/DocsHub';
 import DocDetail from './pages/DocDetail';
 
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<Profile />} />
         
         {/* Assessment Routes */}
         <Route path="/assessment" element={<AssessmentSetup />} />

@@ -38,7 +38,7 @@ export default function Navbar() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
         <ThemeToggle />
         {user ? (
-          <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+          <Link to="/profile" style={{ textDecoration: 'none' }}>
             <div className="navbar-avatar" title={user.username}>{user.username?.[0]?.toUpperCase() || 'U'}</div>
           </Link>
         ) : (

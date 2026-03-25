@@ -47,8 +47,23 @@ export default function RaceMode() {
       playback1.loadSnapshots(res1.data.snapshots);
       playback2.loadSnapshots(res2.data.snapshots);
 
-      setResult1({ steps: res1.data.totalSteps, timeMs: Math.round(Math.random() * 5 + 1) });
-      setResult2({ steps: res2.data.totalSteps, timeMs: Math.round(Math.random() * 5 + 1) });
+      const steps1 = res1.data.totalSteps as number;
+      const steps2 = res2.data.totalSteps as number;
+
+      setResult1({ steps: steps1, timeMs: Math.round(Math.random() * 5 + 1) });
+      setResult2({ steps: steps2, timeMs: Math.round(Math.random() * 5 + 1) });
+
+      // Determine winner
+      const winnerKey = steps1 < steps2 ? algo1 : steps1 > steps2 ? algo2 : 'tie';
+
+      // Record race in backend (fire-and-forget, don't block UI)
+      apiClient.post('/auth/stats/race', {
+        algo1,
+        algo2,
+        winner: winnerKey,
+        steps1,
+        steps2,
+      }).catch(() => {}); // silently ignore if unauthenticated
 
       // Auto-play both
       setTimeout(() => { playback1.play(); playback2.play(); }, 300);

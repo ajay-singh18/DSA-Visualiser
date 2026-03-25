@@ -262,6 +262,8 @@ export default function Visualizer() {
 
       const res = await apiClient.post('/algorithms/run', payload);
       
+      apiClient.post('/auth/stats/algorithm', { algorithmKey: algorithm }).catch(() => {});
+      
       setLanguages(res.data.languages);
       setMetrics(res.data.metrics || null);
       playback.loadSnapshots(res.data.snapshots, true); // true sets autoPlay to seamlessly animate
