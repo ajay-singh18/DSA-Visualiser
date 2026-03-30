@@ -160,7 +160,7 @@ export function runAlgorithm(request: RunAlgorithmRequest): AlgorithmResult {
     if (!Array.isArray(data)) throw new Error('Tree algorithms require an array of numbers or nulls');
 
     switch (algorithmKey) {
-      case 'bst-insert': result = runBSTInsert(data.filter((n: any) => n !== null)); break;
+      case 'bst-insert': result = runBSTInsert(data.filter((n: any) => n !== null), target); break;
       case 'bst-delete': {
         const validData = data.filter((n: any) => n !== null);
         result = runBSTDelete(validData, target ?? validData[validData.length - 1]); 

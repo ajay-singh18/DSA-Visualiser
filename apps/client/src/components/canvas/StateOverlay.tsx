@@ -57,7 +57,7 @@ export default function StateOverlay({ snapshot }: StateOverlayProps) {
               }}>
                 <span style={{ color: 'var(--secondary)' }}>{key}</span>
                 <span style={{ color: 'var(--on-surface-variant)' }}>=</span>
-                <span style={{ color: '#fff', fontWeight: 600 }}>{val}</span>
+                <span style={{ color: 'var(--on-surface)', fontWeight: 600 }}>{val}</span>
               </div>
             ))}
           </div>
@@ -92,7 +92,7 @@ export default function StateOverlay({ snapshot }: StateOverlayProps) {
                       padding: '0.875rem',
                       fontFamily: 'var(--font-mono)',
                       fontSize: '0.85rem',
-                      color: isTop ? '#fff' : 'var(--on-surface-variant)',
+                      color: isTop ? 'var(--on-surface)' : 'var(--on-surface-variant)',
                       boxShadow: isTop ? '0 0 20px rgba(52, 211, 153, 0.2), 0 8px 24px rgba(0,0,0,0.4)' : '0 4px 12px rgba(0,0,0,0.3)',
                       zIndex: idx,
                       transformOrigin: 'top center',

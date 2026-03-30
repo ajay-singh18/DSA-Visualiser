@@ -43,7 +43,7 @@ export default function DPTableVisualizer({ snapshot }: DPTableVisualizerProps) 
                 borderRadius: '8px',
                 fontFamily: 'var(--font-mono)',
                 fontSize: '0.8125rem',
-                color: 'white',
+                color: 'var(--on-surface)',
                 backdropFilter: 'blur(8px)',
                 boxShadow: i === callStack.length - 1 ? '0 0 12px rgba(244, 114, 182, 0.3)' : 'none',
               }}
@@ -86,7 +86,7 @@ export default function DPTableVisualizer({ snapshot }: DPTableVisualizerProps) 
                         fontFamily: 'var(--font-mono)',
                         fontSize: '0.75rem',
                         fontWeight: isHeader ? 600 : 400,
-                        color: isActive ? 'white' : isHeader ? 'var(--on-surface-variant)' : 'white',
+                        color: isActive ? 'var(--on-surface)' : isHeader ? 'var(--on-surface-variant)' : 'var(--on-surface)',
                         background: isActive
                           ? 'rgba(244, 114, 182, 0.5)'
                           : isHeader

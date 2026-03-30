@@ -117,8 +117,26 @@ function deleteNode(root: BSTNode | null, value: number, snapshots: Snapshot[], 
 
     // Case 1 & 2: No child or one child
     if (root.left === null) {
+      snapshots.push({
+        stepIndex: step.count++,
+        codeLine: 10,
+        description: root.right ? `Node has only right child. Replacing with ${root.right.value}` : `Node is a leaf. Deleting it.`,
+        treeState: layoutTree(getGlobalRoot()),
+        highlights: { activeNodes: [root.id], pathNodes: root.right ? [root.right.id] : [] },
+        callStack: nextStack,
+        variables: { deleting: value },
+      });
       return root.right;
     } else if (root.right === null) {
+      snapshots.push({
+        stepIndex: step.count++,
+        codeLine: 10,
+        description: `Node has only left child. Replacing with ${root.left.value}`,
+        treeState: layoutTree(getGlobalRoot()),
+        highlights: { activeNodes: [root.id], pathNodes: [root.left.id] },
+        callStack: nextStack,
+        variables: { deleting: value },
+      });
       return root.left;
     }
 
@@ -136,6 +154,17 @@ function deleteNode(root: BSTNode | null, value: number, snapshots: Snapshot[], 
 
     root.value = minNode.value;
     
+    // Explicit snapshot to show the copied value
+    snapshots.push({
+      stepIndex: step.count++,
+      codeLine: 13,
+      description: `Copied inorder successor value (${minNode.value}) to current node`,
+      treeState: layoutTree(getGlobalRoot()),
+      highlights: { activeNodes: [root.id, minNode.id] },
+      callStack: nextStack,
+      variables: { deleting: value, minFound: minNode.value },
+    });
+
     // Use an isolated context for deleting the successor so we don't duplicate recursive variables
     root.right = deleteNode(root.right, minNode.value, snapshots, step, getGlobalRoot, nextStack);
   }

@@ -74,7 +74,7 @@ export default function TreeVisualizer({ snapshot, treeNodes }: TreeVisualizerPr
   function getEdgeColor(fromId: string, toId: string): string {
     const bothVisited = highlights.pathNodes?.includes(fromId) && highlights.pathNodes?.includes(toId);
     if (bothVisited) return '#34d399';
-    return 'rgba(255, 255, 255, 0.25)';
+    return 'var(--glass-border-highlight)';
   }
 
   return (
@@ -121,7 +121,7 @@ export default function TreeVisualizer({ snapshot, treeNodes }: TreeVisualizerPr
             border: getNodeBorder(node.id),
             boxShadow: getNodeGlow(node.id),
             backdropFilter: 'blur(8px)',
-            color: 'white',
+            color: 'var(--on-surface)',
             fontFamily: 'var(--font-mono)',
             fontSize: '0.875rem',
             fontWeight: 600,

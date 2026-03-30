@@ -33,7 +33,7 @@ export default function GraphVisualizer({ snapshot, nodes, edges, isDirected }: 
 
   const getEdgeStyle = (source: string, target: string) => {
     const isEvaluating = currentNode === source && comparing.has(target);
-    const stroke = isEvaluating ? 'rgba(96, 165, 250, 0.8)' : 'rgba(255, 255, 255, 0.2)';
+    const stroke = isEvaluating ? 'rgba(96, 165, 250, 0.8)' : 'var(--glass-border-highlight)';
     const strokeWidth = isEvaluating ? 3 : 1.5;
     return { stroke, strokeWidth };
   };
@@ -50,7 +50,7 @@ export default function GraphVisualizer({ snapshot, nodes, edges, isDirected }: 
         <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="25" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" fill="rgba(255, 255, 255, 0.5)" />
+            <polygon points="0 0, 10 3.5, 0 7" fill="var(--glass-border-highlight)" />
           </marker>
         </defs>
         {edges.map((edge, i) => {
@@ -76,7 +76,7 @@ export default function GraphVisualizer({ snapshot, nodes, edges, isDirected }: 
                 <text
                   x={(srcNode.x + tgtNode.x) / 2}
                   y={(srcNode.y + tgtNode.y) / 2 - 10}
-                  fill="rgba(255,255,255,0.7)"
+                  fill="var(--on-surface-variant)"
                   fontSize="12"
                   textAnchor="middle"
                 >
@@ -112,7 +112,7 @@ export default function GraphVisualizer({ snapshot, nodes, edges, isDirected }: 
             alignItems: 'center',
             justifyContent: 'center',
             border: '2px solid',
-            color: 'white',
+            color: 'var(--on-surface)',
             fontWeight: 600,
             fontFamily: 'var(--font-mono)',
             fontSize: '14px',

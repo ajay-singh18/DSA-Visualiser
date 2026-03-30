@@ -63,6 +63,7 @@ export default function Visualizer() {
   const [graphInput, setGraphInput] = useState<string>(DEFAULT_GRAPH_STR);
   const [searchTarget, setSearchTarget] = useState<string>('43');
   const [deleteTarget, setDeleteTarget] = useState<string>('30');
+  const [insertTarget, setInsertTarget] = useState<string>('60');
   const [startNode, setStartNode] = useState<string>('A');
   const [aStarTarget, setAStarTarget] = useState<string>('E');
   const [dpParam, setDpParam] = useState<string>('8');
@@ -248,6 +249,8 @@ export default function Visualizer() {
         payload.data = currentTreeValues;
         if (algorithm === 'bst-delete') {
           payload.target = parseInt(deleteTarget, 10);
+        } else if (algorithm === 'bst-insert') {
+          payload.target = parseInt(insertTarget, 10);
         }
       } else if (selectedAlgoMeta?.type === 'dp') {
         if (algorithm === 'fibonacci-recursive' || algorithm === 'fibonacci-dp') {
@@ -394,15 +397,15 @@ export default function Visualizer() {
               </>
             )}
 
-            {/* BST Delete target */}
-            {algorithm === 'bst-delete' && (
+            {/* BST Delete/Insert target */}
+            {(algorithm === 'bst-delete' || algorithm === 'bst-insert') && (
               <input
                 className="input-field"
                 style={{ width: '100px' }}
-                placeholder="Delete key"
+                placeholder={algorithm === 'bst-delete' ? "Delete key" : "Insert key"}
                 type="number"
-                value={deleteTarget}
-                onChange={(e) => setDeleteTarget(e.target.value)}
+                value={algorithm === 'bst-delete' ? deleteTarget : insertTarget}
+                onChange={(e) => algorithm === 'bst-delete' ? setDeleteTarget(e.target.value) : setInsertTarget(e.target.value)}
               />
             )}
 
@@ -510,19 +513,19 @@ export default function Visualizer() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               <div style={{ background: 'var(--glass-bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
                 <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time Taken</div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? '#fff' : 'rgba(255,255,255,0.3)', marginTop: '0.25rem' }}>{metrics ? `${metrics.timeTakenMs}ms` : '-- ms'}</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? 'var(--on-surface)' : 'var(--on-surface-variant)', marginTop: '0.25rem' }}>{metrics ? `${metrics.timeTakenMs}ms` : '-- ms'}</div>
               </div>
               <div style={{ background: 'var(--glass-bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
                 <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Operations</div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? '#fff' : 'rgba(255,255,255,0.3)', marginTop: '0.25rem' }}>{metrics ? `${metrics.comparisons}C, ${metrics.swaps}S` : '--'}</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? 'var(--on-surface)' : 'var(--on-surface-variant)', marginTop: '0.25rem' }}>{metrics ? `${metrics.comparisons}C, ${metrics.swaps}S` : '--'}</div>
               </div>
               <div style={{ background: 'var(--glass-bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
                 <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time Complexity</div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? 'var(--secondary)' : 'rgba(255,255,255,0.3)', marginTop: '0.25rem' }}>{metrics ? metrics.timeComplexity : '--'}</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? 'var(--secondary)' : 'var(--on-surface-variant)', marginTop: '0.25rem' }}>{metrics ? metrics.timeComplexity : '--'}</div>
               </div>
               <div style={{ background: 'var(--glass-bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
                 <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Space Complexity</div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? 'var(--tertiary)' : 'rgba(255,255,255,0.3)', marginTop: '0.25rem' }}>{metrics ? metrics.spaceComplexity : '--'}</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? 'var(--tertiary)' : 'var(--on-surface-variant)', marginTop: '0.25rem' }}>{metrics ? metrics.spaceComplexity : '--'}</div>
               </div>
             </div>
           </div>

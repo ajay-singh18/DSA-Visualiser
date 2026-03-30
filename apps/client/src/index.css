@@ -614,7 +614,7 @@ h1, h2, h3, h4, h5, h6 {
   background: white;
 }
 
-[data-theme="light"] .bar-fill {
+[data-theme="light"] .bar:not(.bar--comparing):not(.bar--swapping):not(.bar--sorted) .bar-fill {
   background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.05) 100%);
   border: 1px solid rgba(0,0,0,0.2);
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
@@ -627,6 +627,38 @@ h1, h2, h3, h4, h5, h6 {
 
 [data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); }
 [data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+
+/* Fixes for hardcoded white colors */
+[data-theme="light"] .navbar-logo,
+[data-theme="light"] .navbar-links a:hover,
+[data-theme="light"] .navbar-links a.active,
+[data-theme="light"] .playback-btn,
+[data-theme="light"] .speed-btn.active,
+[data-theme="light"] .code-tab.active,
+[data-theme="light"] .step-description,
+[data-theme="light"] .auth-card .logo-text,
+[data-theme="light"] .stat-card h3,
+[data-theme="light"] .fab,
+[data-theme="light"] .profile-badge-name,
+[data-theme="light"] .profile-display-name,
+[data-theme="light"] .profile-stat-value,
+[data-theme="light"] .playback-progress-fill,
+[data-theme="light"] .mobile-menu-btn {
+  color: var(--on-surface);
+}
+
+[data-theme="light"] .playback-progress-fill {
+  background: var(--on-surface);
+}
+
+[data-theme="light"] .select-field option {
+  background: white;
+  color: var(--on-surface);
+}
+
+[data-theme="light"] .current-line-glyph {
+  background-color: var(--on-surface) !important;
+}
 
 /* ── Profile Page ── */
 .profile-page {
@@ -722,6 +754,11 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--on-surface-variant);
   transition: all 0.3s ease;
   text-decoration: none;
+}
+.profile-social-btn.inactive {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
 }
 .profile-social-btn:hover {
   background: rgba(0, 212, 255, 0.15);
@@ -1091,4 +1128,78 @@ h1, h2, h3, h4, h5, h6 {
   .profile-info { align-items: center; }
   .profile-socials { justify-content: center; }
   .profile-badges-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Global Responsive Overrides ── */
+@media (max-width: 900px) {
+  /* Split Screen Tablet: Stack Vertically */
+  .split-screen {
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100vh - 73px);
+    overflow: visible;
+  }
+  .split-left, .split-right {
+    flex: none;
+    width: 100%;
+    min-height: 400px;
+  }
+  
+  /* Navbar: Hide links, show button */
+  .navbar-links {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: block !important;
+  }
+  
+  /* Dashboard Stats Grid */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Typography tweaks */
+  .dashboard-page h1 { font-size: 1.75rem; }
+  .stat-card h3 { font-size: 2rem; }
+}
+
+@media (max-width: 600px) {
+  /* Mobile general */
+  .dashboard-page, .auth-page {
+    padding: var(--space-4);
+  }
+  
+
+  
+  /* Dashboard Stats Grid */
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Auth Card */
+  .auth-card {
+    padding: var(--space-6) var(--space-4);
+    border-radius: 20px;
+  }
+  
+  /* Table/Canvas overflow */
+  .glass-card {
+    overflow-x: auto;
+  }
+  
+  /* Visualizer specific */
+  .canvas-area {
+    padding: var(--space-4);
+    overflow-x: auto;
+    min-height: 250px;
+  }
+  .playback-bar {
+    flex-wrap: wrap;
+    padding: var(--space-2) var(--space-4);
+  }
+  
+  /* Headers */
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.125rem !important; }
 }

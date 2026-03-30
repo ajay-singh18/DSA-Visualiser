@@ -154,7 +154,7 @@ export default function AnimatedDemo() {
                   boxShadow: isComparing || isSwapping ? '0 0 15px ' + barColor : 'none'
                 }}
               >
-                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '0.9rem' }}>{item.val}</span>
+                <span style={{ color: 'var(--on-surface)', fontWeight: 'bold', fontSize: '0.9rem' }}>{item.val}</span>
               </motion.div>
             );
           })}
