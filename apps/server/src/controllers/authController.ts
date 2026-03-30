@@ -79,9 +79,9 @@ export async function login(req: Request, res: Response): Promise<void> {
       user: formatUserObject(user),
       token,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Failed to login' });
+    res.status(500).json({ error: 'Failed to login', details: error.message });
   }
 }
 
