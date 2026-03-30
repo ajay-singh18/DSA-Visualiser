@@ -12,7 +12,7 @@ import bookmarkRoutes from '../apps/server/src/routes/bookmarks';
 import assessmentRoutes from '../apps/server/src/routes/assessments';
 import { errorHandler } from '../apps/server/src/middleware/errorHandler';
 
-const app = express();
+const app = express(); 
 
 // ── Middleware ──
 app.use(cors());
