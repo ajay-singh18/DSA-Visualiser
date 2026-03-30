@@ -4,12 +4,12 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 
 // Import routes relative to apps/server/api
-import authRoutes from '../src/routes/auth';
-import layoutRoutes from '../src/routes/layouts';
-import algorithmRoutes from '../src/routes/algorithms';
-import bookmarkRoutes from '../src/routes/bookmarks';
-import assessmentRoutes from '../src/routes/assessments';
-import { errorHandler } from '../src/middleware/errorHandler';
+import authRoutes from '../src/routes/auth.js';
+import layoutRoutes from '../src/routes/layouts.js';
+import algorithmRoutes from '../src/routes/algorithms.js';
+import bookmarkRoutes from '../src/routes/bookmarks.js';
+import assessmentRoutes from '../src/routes/assessments.js';
+import { errorHandler } from '../src/middleware/errorHandler.js';
 
 const app = express();
 
