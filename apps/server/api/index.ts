@@ -1,18 +1,17 @@
-// Vercel serverless entry point
-// @vercel/node compiles TypeScript natively - no need for .js extensions
+// Vercel serverless entry point inside apps/server/api
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 
-// Import routes directly from server source
-import authRoutes from '../apps/server/src/routes/auth';
-import layoutRoutes from '../apps/server/src/routes/layouts';
-import algorithmRoutes from '../apps/server/src/routes/algorithms';
-import bookmarkRoutes from '../apps/server/src/routes/bookmarks';
-import assessmentRoutes from '../apps/server/src/routes/assessments';
-import { errorHandler } from '../apps/server/src/middleware/errorHandler';
+// Import routes relative to apps/server/api
+import authRoutes from '../src/routes/auth';
+import layoutRoutes from '../src/routes/layouts';
+import algorithmRoutes from '../src/routes/algorithms';
+import bookmarkRoutes from '../src/routes/bookmarks';
+import assessmentRoutes from '../src/routes/assessments';
+import { errorHandler } from '../src/middleware/errorHandler';
 
-const app = express(); 
+const app = express();
 
 // ── Middleware ──
 app.use(cors());
