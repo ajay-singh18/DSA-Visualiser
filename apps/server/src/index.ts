@@ -37,4 +37,11 @@ async function start(): Promise<void> {
   });
 }
 
-start();
+// In Vercel serverless, we just need the app export; locally we call start()
+if (!process.env.VERCEL) {
+  start();
+} else {
+  connectDB();
+}
+
+export default app;

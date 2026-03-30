@@ -63,7 +63,7 @@ export default function Visualizer() {
   const [graphInput, setGraphInput] = useState<string>(DEFAULT_GRAPH_STR);
   const [searchTarget, setSearchTarget] = useState<string>('43');
   const [deleteTarget, setDeleteTarget] = useState<string>('30');
-  const [insertTarget, setInsertTarget] = useState<string>('60');
+  const [insertTarget, setInsertTarget] = useState<string>('');
   const [startNode, setStartNode] = useState<string>('A');
   const [aStarTarget, setAStarTarget] = useState<string>('E');
   const [dpParam, setDpParam] = useState<string>('8');
@@ -249,8 +249,11 @@ export default function Visualizer() {
         payload.data = currentTreeValues;
         if (algorithm === 'bst-delete') {
           payload.target = parseInt(deleteTarget, 10);
-        } else if (algorithm === 'bst-insert') {
-          payload.target = parseInt(insertTarget, 10);
+        } else if (algorithm === 'bst-insert' && insertTarget.trim() !== '') {
+          const parsed = parseInt(insertTarget, 10);
+          if (!isNaN(parsed)) {
+            payload.target = parsed;
+          }
         }
       } else if (selectedAlgoMeta?.type === 'dp') {
         if (algorithm === 'fibonacci-recursive' || algorithm === 'fibonacci-dp') {
@@ -397,15 +400,27 @@ export default function Visualizer() {
               </>
             )}
 
-            {/* BST Delete/Insert target */}
-            {(algorithm === 'bst-delete' || algorithm === 'bst-insert') && (
+            {/* BST Delete target */}
+            {algorithm === 'bst-delete' && (
               <input
                 className="input-field"
                 style={{ width: '100px' }}
-                placeholder={algorithm === 'bst-delete' ? "Delete key" : "Insert key"}
+                placeholder="Delete key"
                 type="number"
-                value={algorithm === 'bst-delete' ? deleteTarget : insertTarget}
-                onChange={(e) => algorithm === 'bst-delete' ? setDeleteTarget(e.target.value) : setInsertTarget(e.target.value)}
+                value={deleteTarget}
+                onChange={(e) => setDeleteTarget(e.target.value)}
+              />
+            )}
+
+            {/* BST Insert target (optional) */}
+            {algorithm === 'bst-insert' && (
+              <input
+                className="input-field"
+                style={{ width: '130px' }}
+                placeholder="Insert key (optional)"
+                type="number"
+                value={insertTarget}
+                onChange={(e) => setInsertTarget(e.target.value)}
               />
             )}
 
