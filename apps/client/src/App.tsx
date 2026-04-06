@@ -11,6 +11,7 @@ import Landing from './pages/Landing';
 import Profile from './pages/Profile';
 import DocsHub from './pages/DocsHub';
 import DocDetail from './pages/DocDetail';
+import ProblemTracker from './pages/ProblemTracker';
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/visualizer" element={<Visualizer />} />
         <Route path="/docs" element={<DocsHub />} />
         <Route path="/docs/:algoKey" element={<DocDetail />} />
+        <Route path="/problems" element={<ProblemTracker />} />
         <Route path="/race" element={<RaceMode />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />

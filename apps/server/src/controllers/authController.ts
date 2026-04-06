@@ -289,3 +289,41 @@ export async function recordAlgorithmRun(req: AuthRequest, res: Response): Promi
     res.status(500).json({ error: 'Failed to record algorithm run' });
   }
 }
+
+export async function recordProblemCompleted(req: AuthRequest, res: Response): Promise<void> {
+  try {
+    const { problemName } = req.body;
+    const userId = req.userId;
+
+    if (!userId || !problemName) {
+      res.status(400).json({ error: 'Missing data' });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    user.activity.push({
+      icon: '✅',
+      text: `Completed problem: ${problemName}`,
+      date: new Date(),
+    });
+    // Let's not trim the activity array too aggressively so the 365-day heatmap works better, 
+    // but a limit handles memory issues. Let's increase limit a bit here for completeness.
+    if (user.activity.length > 365) {
+      user.activity = user.activity.slice(-365);
+    }
+
+    user.markModified('activity');
+    await user.save();
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Record problem completion error:', error);
+    res.status(500).json({ error: 'Failed to record problem completion' });
+  }
+}
+

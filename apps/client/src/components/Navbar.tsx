@@ -55,6 +55,7 @@ export default function Navbar() {
           <li><Link to="/visualizer" className={location.pathname === '/visualizer' ? 'active' : ''}>Visualizer</Link></li>
           <li><Link to="/race" className={location.pathname === '/race' ? 'active' : ''}>Race Mode</Link></li>
           <li><Link to="/docs" className={location.pathname.startsWith('/docs') ? 'active' : ''}>Docs</Link></li>
+          <li><Link to="/problems" className={location.pathname === '/problems' ? 'active' : ''}>Problems</Link></li>
           <li><Link to="/assessment" className={location.pathname === '/assessment' ? 'active' : ''}>Quiz</Link></li>
           <li><Link to="/dashboard" className={location.pathname === '/dashboard' ? 'active' : ''}>Dashboard</Link></li>
         </ul>
@@ -129,6 +130,7 @@ export default function Navbar() {
           <li><Link to="/visualizer" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none', color: 'var(--on-surface)', fontSize: '1.1rem' }}>Visualizer</Link></li>
           <li><Link to="/race" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none', color: 'var(--on-surface)', fontSize: '1.1rem' }}>Race Mode</Link></li>
           <li><Link to="/docs" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none', color: 'var(--on-surface)', fontSize: '1.1rem' }}>Docs</Link></li>
+          <li><Link to="/problems" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none', color: 'var(--on-surface)', fontSize: '1.1rem' }}>Problems</Link></li>
           <li><Link to="/assessment" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none', color: 'var(--on-surface)', fontSize: '1.1rem' }}>Quiz</Link></li>
           <li><Link to="/dashboard" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none', color: 'var(--on-surface)', fontSize: '1.1rem' }}>Dashboard</Link></li>
         </ul>
