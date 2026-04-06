@@ -75,6 +75,11 @@ export default function Visualizer() {
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // AI Tutor state
+  const [loadingAI, setLoadingAI] = useState(false);
+  const [aiExplanation, setAiExplanation] = useState<string | null>(null);
+  const [showAiPanel, setShowAiPanel] = useState(false);
+
   const playback = usePlayback();
   const selectedAlgoMeta = ALGORITHMS.find(a => a.key === algorithm);
   
@@ -461,10 +466,85 @@ export default function Visualizer() {
             <button className="btn-gradient" onClick={handleRun} disabled={loading}>
               {loading ? 'Running...' : '▶ Run'}
             </button>
+
+            <button
+              className="btn-gradient"
+              disabled={loadingAI || !playback.currentSnapshot}
+              onClick={async () => {
+                if (!playback.currentSnapshot) return;
+                setLoadingAI(true);
+                setAiExplanation(null);
+                setShowAiPanel(true);
+                try {
+                  const res = await apiClient.post('/ai/explain', {
+                    algorithmName: selectedAlgoMeta?.label || algorithm,
+                    codeLine: playback.currentSnapshot.codeLine,
+                    snapshotDescription: playback.currentSnapshot.description,
+                    variables: playback.currentSnapshot.variables || {},
+                  });
+                  setAiExplanation(res.data.explanation);
+                } catch {
+                  setAiExplanation('AI Tutor is currently unavailable.');
+                } finally {
+                  setLoadingAI(false);
+                }
+              }}
+              style={{
+                background: 'linear-gradient(135deg, rgba(167,139,250,0.25), rgba(96,165,250,0.25))',
+                border: '1px solid rgba(167,139,250,0.4)',
+                padding: 'var(--space-3) var(--space-4)',
+              }}
+            >
+              {loadingAI ? '⏳ Thinking...' : '✨ Ask AI'}
+            </button>
           </div>
 
           {/* Interactive visual canvas bounds */}
           <div style={{ flex: 1, display: 'flex', position: 'relative', overflow: 'hidden' }}>
+
+            {/* AI Explanation Floating Panel */}
+            {showAiPanel && (
+              <div style={{
+                position: 'absolute',
+                top: 'var(--space-4)',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 50,
+                maxWidth: '520px',
+                width: '90%',
+                background: 'rgba(15, 23, 42, 0.92)',
+                backdropFilter: 'blur(16px)',
+                border: '1px solid rgba(167,139,250,0.4)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '1rem 1.25rem',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.75rem',
+              }}>
+                <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>✨</span>
+                <p style={{ margin: 0, flex: 1, fontSize: '0.9rem', lineHeight: 1.5, color: 'var(--on-surface)' }}>
+                  {loadingAI ? 'Thinking…' : (aiExplanation || 'Click Ask AI while paused on a step.')}
+                </p>
+                <button
+                  onClick={() => { setShowAiPanel(false); setAiExplanation(null); }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--on-surface-variant)',
+                    cursor: 'pointer',
+                    fontSize: '1.1rem',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    lineHeight: 1,
+                    flexShrink: 0,
+                  }}
+                  title="Close"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
             
             <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
               {selectedAlgoMeta?.type === 'graph' ? (

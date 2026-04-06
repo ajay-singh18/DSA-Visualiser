@@ -1,4 +1,4 @@
-import { AlgorithmType } from '@dsa-visualizer/shared';
+import { AlgorithmType } from "@dsa-visualizer/shared";
 
 export interface CodeSnippets {
   cpp: string;
@@ -21,11 +21,11 @@ void solve() {
     pass`,
   javascript: `function solve() {
 
-}`
+}`,
 };
 
 export const CODE_LIBRARY: Record<AlgorithmType, CodeSnippets> = {
-  'bubble-sort': {
+  "bubble-sort": {
     cpp: `void bubbleSort(int arr[], int n) {
     for (int i = 0; i < n - 1; i++)
         for (int j = 0; j < n - i - 1; j++)
@@ -60,9 +60,9 @@ export const CODE_LIBRARY: Record<AlgorithmType, CodeSnippets> = {
         }
     }
     return arr;
-}`
+}`,
   },
-  'selection-sort': {
+  "selection-sort": {
     cpp: `void selectionSort(int arr[], int n) {
     for (int i = 0; i < n - 1; i++) {
         int min_idx = i;
@@ -103,9 +103,9 @@ export const CODE_LIBRARY: Record<AlgorithmType, CodeSnippets> = {
         [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
     }
     return arr;
-}`
+}`,
   },
-  'insertion-sort': {
+  "insertion-sort": {
     cpp: `void insertionSort(int arr[], int n) {
     for (int i = 1; i < n; i++) {
         int key = arr[i];
@@ -149,9 +149,9 @@ export const CODE_LIBRARY: Record<AlgorithmType, CodeSnippets> = {
         arr[j + 1] = key;
     }
     return arr;
-}`
+}`,
   },
-  'merge-sort': {
+  "merge-sort": {
     cpp: `void merge(int arr[], int l, int m, int r) {
   // merge portions...
 }
@@ -186,9 +186,9 @@ void mergeSort(int arr[], int l, int r) {
     const left = mergeSort(arr.slice(0, mid));
     const right = mergeSort(arr.slice(mid));
     return merge(left, right);
-}`
+}`,
   },
-  'quick-sort': {
+  "quick-sort": {
     cpp: `int partition(int arr[], int low, int high) {
     int pivot = arr[high];
     int i = (low - 1);
@@ -230,9 +230,9 @@ void quickSort(int arr[], int low, int high) {
         quickSort(arr, pi + 1, high);
     }
     return arr;
-}`
+}`,
   },
-  'linear-search': {
+  "linear-search": {
     cpp: `int linearSearch(int arr[], int n, int x) {
     for (int i = 0; i < n; i++)
         if (arr[i] == x)
@@ -257,9 +257,9 @@ void quickSort(int arr[], int low, int high) {
         if (arr[i] === x) return i;
     }
     return -1;
-}`
+}`,
   },
-  'binary-search': {
+  "binary-search": {
     cpp: `int binarySearch(int arr[], int l, int r, int x) {
     while (l <= r) {
         int m = l + (r - l) / 2;
@@ -300,9 +300,9 @@ void quickSort(int arr[], int low, int high) {
         else r = m - 1;
     }
     return -1;
-}`
+}`,
   },
-  'bfs': {
+  bfs: {
     cpp: `void BFS(int s, vector<vector<int>>& adj) {
     vector<bool> visited(adj.size(), false);
     queue<int> q;
@@ -358,9 +358,9 @@ void quickSort(int arr[], int low, int high) {
             }
         }
     }
-}`
+}`,
   },
-  'dfs': {
+  dfs: {
     cpp: `void DFSUtil(int v, vector<bool>& visited, vector<vector<int>>& adj) {
     visited[v] = true;
     for (int i : adj[v])
@@ -394,9 +394,9 @@ void DFS(int v, vector<vector<int>>& adj) {
             dfs(graph, nei, visited);
         }
     }
-}`
+}`,
   },
-  'dijkstra': {
+  dijkstra: {
     cpp: `void dijkstra(vector<vector<pair<int,int>>>& adj, int V, int src) {
     priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
     vector<int> dist(V, INT_MAX);
@@ -464,9 +464,9 @@ def dijkstra(graph, start):
         }
     }
     return dist;
-}`
+}`,
   },
-  'bst-insert': {
+  "bst-insert": {
     cpp: `Node* insert(Node* node, int key) {
     if (node == NULL) return new Node(key);
     if (key < node->key)
@@ -503,10 +503,10 @@ def dijkstra(graph, start):
         node.right = insert(node.right, key);
     }
     return node;
-}`
+}`,
   },
-  'bst-delete': COMMON_PLACEHOLDER,
-  'inorder': {
+  "bst-delete": COMMON_PLACEHOLDER,
+  inorder: {
     cpp: `void inorder(Node *root) {
     if (root != NULL) {
         inorder(root->left);
@@ -534,9 +534,9 @@ def dijkstra(graph, start):
         console.log(root.val);
         inorder(root.right);
     }
-}`
+}`,
   },
-  'preorder': {
+  preorder: {
     cpp: `void preorder(Node *root) {
     if (root != NULL) {
         cout << root->key << " ";
@@ -564,9 +564,9 @@ def dijkstra(graph, start):
         preorder(root.left);
         preorder(root.right);
     }
-}`
+}`,
   },
-  'postorder': {
+  postorder: {
     cpp: `void postorder(Node *root) {
     if (root != NULL) {
         postorder(root->left);
@@ -594,9 +594,9 @@ def dijkstra(graph, start):
         postorder(root.right);
         console.log(root.val);
     }
-}`
+}`,
   },
-  'fibonacci-recursive': {
+  "fibonacci-recursive": {
     cpp: `int fib(int n) {
     if (n <= 1) return n;
     return fib(n-1) + fib(n-2);
@@ -614,9 +614,9 @@ def dijkstra(graph, start):
     javascript: `function fib(n) {
     if (n <= 1) return n;
     return fib(n-1) + fib(n-2);
-}`
+}`,
   },
-  'fibonacci-dp': {
+  "fibonacci-dp": {
     cpp: `int fib(int n) {
     int f[n + 2];
     f[0] = 0; f[1] = 1;
@@ -646,9 +646,9 @@ def dijkstra(graph, start):
         f[i] = f[i - 1] + f[i - 2];
     }
     return f[n];
-}`
+}`,
   },
-  'knapsack-dp': {
+  "knapsack-dp": {
     cpp: `int knapSack(int W, int wt[], int val[], int n) {
     int K[n + 1][W + 1];
     for (int i = 0; i <= n; i++) {
@@ -697,9 +697,9 @@ def dijkstra(graph, start):
         }
     }
     return K[n][W];
-}`
+}`,
   },
-  'lcs-dp': {
+  "lcs-dp": {
     cpp: `int lcs(char *X, char *Y, int m, int n) {
     int L[m + 1][n + 1];
     for (int i = 0; i <= m; i++) {
@@ -748,9 +748,9 @@ def dijkstra(graph, start):
         }
     }
     return L[m][n];
-}`
+}`,
   },
-  'prims': {
+  prims: {
     cpp: `void primMST(vector<vector<pair<int,int>>>& adj, int V) {
     priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
     vector<int> key(V, INT_MAX);
@@ -848,9 +848,9 @@ def primMST(graph, V):
         }
     }
     return parent;
-}`
+}`,
   },
-  'kruskals': {
+  kruskals: {
     cpp: `struct Edge { int src, dest, weight; };
 int find(vector<int>& parent, int i) {
     if (parent[i] == -1) return i;
@@ -937,9 +937,9 @@ function kruskalMST(edges, V) {
             merge(parent, x, y);
         }
     }
-}`
+}`,
   },
-  'bellman-ford': {
+  "bellman-ford": {
     cpp: `void bellmanFord(vector<Edge>& edges, int V, int src) {
     vector<int> dist(V, INT_MAX);
     dist[src] = 0;
@@ -1014,9 +1014,9 @@ function kruskalMST(edges, V) {
         }
     }
     return dist;
-}`
+}`,
   },
-  'floyd-warshall': {
+  "floyd-warshall": {
     cpp: `void floydWarshall(vector<vector<int>>& dist, int V) {
     for (int k = 0; k < V; k++) {
         for (int i = 0; i < V; i++) {
@@ -1057,9 +1057,9 @@ function kruskalMST(edges, V) {
         }
     }
     return dist;
-}`
+}`,
   },
-  'a-star': {
+  "a-star": {
     cpp: `// A* uses a heuristic distance (h) to guide Dijkstra's search
 void aStar(vector<vector<pair<int,int>>>& adj, vector<int>& h, int V, int src, int target) {
     priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
@@ -1157,6 +1157,6 @@ def a_star(graph, h, V, src, target):
         }
     }
     return g;
-}`
-  }
+}`,
+  },
 };

@@ -1,8 +1,4 @@
-import type { Snapshot } from '@dsa-visualizer/shared';
-
-
-
-
+import type { Snapshot } from "@dsa-visualizer/shared";
 
 export function runMergeSort(input: number[]): {
   snapshots: Snapshot[];
@@ -27,8 +23,8 @@ export function runMergeSort(input: number[]): {
     callStack.push(fnSignature);
 
     if (start >= end) {
-        callStack.pop();
-        return;
+      callStack.pop();
+      return;
     }
 
     const mid = Math.floor((start + end) / 2);
@@ -38,7 +34,9 @@ export function runMergeSort(input: number[]): {
       codeLine: 3, // const mid = Math.floor(arr.length / 2);
       description: `Dividing subarray [${start}..${end}] at midpoint ${mid}`,
       arrayState: [...arr],
-      highlights: { comparing: Array.from({ length: end - start + 1 }, (_, k) => start + k) },
+      highlights: {
+        comparing: Array.from({ length: end - start + 1 }, (_, k) => start + k),
+      },
       callStack: [...callStack],
       variables: { start, end, mid },
     });
@@ -49,7 +47,9 @@ export function runMergeSort(input: number[]): {
     // Merge step
     const left = arr.slice(start, mid + 1);
     const right = arr.slice(mid + 1, end + 1);
-    let i = 0, j = 0, k = start;
+    let i = 0,
+      j = 0,
+      k = start;
 
     while (i < left.length && j < right.length) {
       snapshots.push({
@@ -92,12 +92,15 @@ export function runMergeSort(input: number[]): {
       description: `Merged subarray [${start}..${end}]`,
       arrayState: [...arr],
       highlights: {
-        sorted: Array.from({ length: end - start + 1 }, (_, idx) => start + idx),
+        sorted: Array.from(
+          { length: end - start + 1 },
+          (_, idx) => start + idx,
+        ),
       },
       callStack: [...callStack],
       variables: { start, end, mid, length: end - start + 1 },
     });
-    
+
     callStack.pop();
   }
 
@@ -106,7 +109,7 @@ export function runMergeSort(input: number[]): {
   snapshots.push({
     stepIndex: step++,
     codeLine: 1, // abstract end
-    description: 'Merge Sort complete!',
+    description: "Merge Sort complete!",
     arrayState: [...arr],
     highlights: { sorted: Array.from({ length: arr.length }, (_, k) => k) },
     callStack: [...callStack],
