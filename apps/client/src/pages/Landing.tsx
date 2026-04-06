@@ -82,7 +82,7 @@ export default function Landing() {
     { icon: '⚔️', title: 'Algorithm Races', desc: 'Pit two sorting algorithms head-to-head on identical datasets to compare performance.', color: 'var(--secondary)' },
     { icon: '💻', title: 'Multi-Language Code', desc: 'View algorithm implementations in C++, Java, Python, and JavaScript side by side.', color: '#10b981' },
     { icon: '📊', title: 'Timed Assessments', desc: 'Test your DSA knowledge with timed quizzes and track your progress over time.', color: '#f59e0b' },
-    { icon: '🎨', title: 'Beautiful UI', desc: 'Glassmorphism design with dark/light modes, smooth animations, and responsive layouts.', color: '#ec4899' },
+    { icon: '📝', title: 'Problem Tracker', desc: 'Track your progress across 120+ curated LeetCode problems with personal notes and topic filters.', color: '#8b5cf6' },
   ];
 
   return (
@@ -144,6 +144,9 @@ export default function Landing() {
             </Link>
             <Link to="/assessment" style={{ textDecoration: 'none' }}>
               <button className="landing-btn-ghost">📝 Take Assessment</button>
+            </Link>
+            <Link to="/problems" style={{ textDecoration: 'none' }}>
+              <button className="landing-btn-ghost">💻 Solve Problems</button>
             </Link>
           </motion.div>
         </motion.section>
