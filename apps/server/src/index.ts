@@ -8,6 +8,7 @@ import layoutRoutes from './routes/layouts.js';
 import algorithmRoutes from './routes/algorithms.js';
 import bookmarkRoutes from './routes/bookmarks.js';
 import assessmentRoutes from './routes/assessments.js';
+import aiRoutes from './routes/ai.js';
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use('/api/layouts', layoutRoutes);
 app.use('/api/algorithms', algorithmRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/assessments', assessmentRoutes);
+app.use('/api/ai', aiRoutes);
 
 // ── Error handler ──
 app.use(errorHandler);

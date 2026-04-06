@@ -1,17 +1,49 @@
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Snapshot } from '@dsa-visualizer/shared';
+import apiClient from '../../api/client';
 
 interface StateOverlayProps {
   snapshot: Snapshot | null;
+  algorithmName?: string;
 }
 
-export default function StateOverlay({ snapshot }: StateOverlayProps) {
-  if (!snapshot || (Object.keys(snapshot.variables || {}).length === 0 && (!snapshot.callStack || snapshot.callStack.length === 0))) {
+export default function StateOverlay({ snapshot, algorithmName }: StateOverlayProps) {
+  const [loadingAI, setLoadingAI] = useState(false);
+  const [aiExplanation, setAiExplanation] = useState<string | null>(null);
+
+  // Clear AI explanation when the step changes
+  useEffect(() => {
+    setAiExplanation(null);
+  }, [snapshot]);
+
+  if (!snapshot || (Object.keys(snapshot.variables || {}).length === 0 && (!snapshot.callStack || snapshot.callStack.length === 0) && !snapshot.description)) {
     return null;
   }
 
   const vars = snapshot.variables || {};
   const stack = snapshot.callStack || [];
+
+  const handleAskAI = async () => {
+    if (!snapshot) return;
+    setLoadingAI(true);
+    setAiExplanation(null);
+
+    try {
+      const response = await apiClient.post('/ai/explain', {
+        algorithmName,
+        codeLine: snapshot.codeLine,
+        snapshotDescription: snapshot.description,
+        variables: vars,
+      });
+      setAiExplanation(response.data.explanation);
+    } catch (err: any) {
+      setAiExplanation("AI Tutor is currently unavailable. Please check your API key configuration.");
+      console.error(err);
+    } finally {
+      setLoadingAI(false);
+    }
+  };
 
   return (
     <div style={{
@@ -25,6 +57,53 @@ export default function StateOverlay({ snapshot }: StateOverlayProps) {
       background: 'rgba(0, 0, 0, 0.2)',
       zIndex: 10,
     }}>
+      {/* AI Tutor Button */}
+      <motion.button
+        onClick={handleAskAI}
+        disabled={loadingAI}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        style={{
+          background: 'linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(96, 165, 250, 0.2))',
+          border: '1px solid rgba(167, 139, 250, 0.4)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '0.75rem',
+          color: 'white',
+          fontFamily: 'var(--font-display)',
+          fontWeight: 600,
+          cursor: loadingAI ? 'not-allowed' : 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.5rem',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+        }}
+      >
+        <span>✨</span> {loadingAI ? 'Thinking...' : 'Ask AI'}
+      </motion.button>
+
+      {/* AI Explanation Result */}
+      <AnimatePresence>
+        {aiExplanation && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderLeft: '3px solid var(--primary)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '1rem',
+              fontSize: '0.875rem',
+              color: 'var(--on-surface)',
+              lineHeight: 1.5,
+            }}
+          >
+            <p style={{ margin: 0 }}>{aiExplanation}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Variables Card */}
       {Object.keys(vars).length > 0 && (
         <motion.div
@@ -57,7 +136,7 @@ export default function StateOverlay({ snapshot }: StateOverlayProps) {
               }}>
                 <span style={{ color: 'var(--secondary)' }}>{key}</span>
                 <span style={{ color: 'var(--on-surface-variant)' }}>=</span>
-                <span style={{ color: 'var(--on-surface)', fontWeight: 600 }}>{val}</span>
+                <span style={{ color: 'var(--on-surface)', fontWeight: 600 }}>{String(val)}</span>
               </div>
             ))}
           </div>

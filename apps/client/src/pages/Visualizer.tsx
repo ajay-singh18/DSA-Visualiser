@@ -490,7 +490,10 @@ export default function Visualizer() {
             </div>
 
             {/* Static variables and call stack tracing card */}
-            <StateOverlay snapshot={playback.currentSnapshot} />
+            <StateOverlay 
+              snapshot={playback.currentSnapshot} 
+              algorithmName={selectedAlgoMeta?.label || algorithm} 
+            />
           </div>
 
           <PlaybackBar
