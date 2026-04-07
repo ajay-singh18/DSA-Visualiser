@@ -2,10 +2,12 @@ interface Props {
   currentIndex: number;
   totalSteps: number;
   isPlaying: boolean;
+  isFinished: boolean;
   speed: number;
   description: string;
   onPlay: () => void;
   onPause: () => void;
+  onReplay: () => void;
   onStepForward: () => void;
   onStepBackward: () => void;
   onSpeedChange: (speed: number) => void;
@@ -17,10 +19,12 @@ export default function PlaybackBar({
   currentIndex,
   totalSteps,
   isPlaying,
+  isFinished,
   speed,
   description,
   onPlay,
   onPause,
+  onReplay,
   onStepForward,
   onStepBackward,
   onSpeedChange,
@@ -35,7 +39,11 @@ export default function PlaybackBar({
           ⏮
         </button>
 
-        {isPlaying ? (
+        {isFinished ? (
+          <button className="playback-btn" onClick={onReplay} title="Replay">
+            ↺
+          </button>
+        ) : isPlaying ? (
           <button className="playback-btn" onClick={onPause} title="Pause">
             ⏸
           </button>

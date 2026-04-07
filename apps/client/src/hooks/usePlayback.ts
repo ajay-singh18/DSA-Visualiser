@@ -87,11 +87,18 @@ export function usePlayback() {
   }, [state.isPlaying, state.speed, clearTimer]);
 
   const currentSnapshot = state.snapshots[state.currentIndex] ?? null;
+  const isFinished = state.snapshots.length > 0 && state.currentIndex >= state.snapshots.length - 1 && !state.isPlaying;
+
+  const replay = useCallback(() => {
+    clearTimer();
+    setState((prev) => ({ ...prev, currentIndex: 0, isPlaying: true }));
+  }, [clearTimer]);
 
   return {
     ...state,
     currentSnapshot,
     totalSteps: state.snapshots.length,
+    isFinished,
     loadSnapshots,
     play,
     pause,
@@ -99,5 +106,6 @@ export function usePlayback() {
     stepBackward,
     setSpeed,
     goToStep,
+    replay,
   };
 }

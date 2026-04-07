@@ -82,6 +82,13 @@ export default function Visualizer() {
 
   const playback = usePlayback();
   const selectedAlgoMeta = ALGORITHMS.find(a => a.key === algorithm);
+
+  // Fetch code snippets when algorithm changes (so code shows before clicking Run)
+  useEffect(() => {
+    apiClient.get(`/algorithms/code/${algorithm}`)
+      .then(res => setLanguages(res.data.languages))
+      .catch(() => setLanguages(null));
+  }, [algorithm]);
   
   // Derived state for the actual array to pass to ArrayVisualizer
   const currentArray = inputArray.split(',').map((n) => parseInt(n.trim(), 10)).filter((n) => !isNaN(n));
@@ -585,10 +592,12 @@ export default function Visualizer() {
             currentIndex={playback.currentIndex}
             totalSteps={playback.totalSteps}
             isPlaying={playback.isPlaying}
+            isFinished={playback.isFinished}
             speed={playback.speed}
             description={playback.currentSnapshot?.description || 'Select an algorithm and click Run to begin.'}
             onPlay={playback.play}
             onPause={playback.pause}
+            onReplay={playback.replay}
             onStepForward={playback.stepForward}
             onStepBackward={playback.stepBackward}
             onSpeedChange={playback.setSpeed}
