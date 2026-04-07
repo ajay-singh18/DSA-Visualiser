@@ -486,8 +486,8 @@ export default function Visualizer() {
                     variables: playback.currentSnapshot.variables || {},
                   });
                   setAiExplanation(res.data.explanation);
-                } catch (err: any) {
-                  setAiExplanation(err?.response?.data?.error || 'AI Tutor is currently unavailable.');
+                } catch {
+                  setAiExplanation('AI Tutor is currently unavailable.');
                 } finally {
                   setLoadingAI(false);
                 }
