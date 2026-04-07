@@ -17,6 +17,8 @@ export default function CodePanel({ languages, currentLine }: Props) {
   const decorationsRef = useRef<string[]>([]);
   
   const code = languages ? languages[lang] : '// Select an algorithm and click Run';
+  const lineCount = code.split('\n').length;
+  const editorHeight = Math.min(lineCount * 22 + 24, 280);
 
   useEffect(() => {
     if (editorRef.current && currentLine) {
@@ -40,7 +42,7 @@ export default function CodePanel({ languages, currentLine }: Props) {
   }, [currentLine, code]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div className="code-panel-tabs">
         <button className={`code-tab ${lang === 'cpp' ? 'active' : ''}`} onClick={() => setLang('cpp')}>
           C++
@@ -55,9 +57,9 @@ export default function CodePanel({ languages, currentLine }: Props) {
           JavaScript
         </button>
       </div>
-      <div className="code-editor-wrapper">
+      <div className="code-editor-wrapper" style={{ height: `${editorHeight}px` }}>
         <Editor
-          height="100%"
+          height={`${editorHeight}px`}
           language={lang}
           value={code}
           theme="vs-dark"

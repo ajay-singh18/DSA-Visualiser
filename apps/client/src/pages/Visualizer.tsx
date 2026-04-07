@@ -600,7 +600,7 @@ export default function Visualizer() {
 
         {/* Right: Code editor and Metrics */}
         <div className="split-right" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-          <div style={{ flex: '0 0 45%', minHeight: 0, borderBottom: '1px solid var(--glass-border)' }}>
+          <div style={{ flexShrink: 0, borderBottom: '1px solid var(--glass-border)' }}>
             <CodePanel
               languages={languages}
               currentLine={playback.currentSnapshot?.codeLine}

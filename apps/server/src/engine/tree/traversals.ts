@@ -85,7 +85,7 @@ function inorderTraversal(node: BSTNode | null, root: BSTNode, visited: string[]
     stepIndex: step.count++, codeLine: 4, // console.log(root.val);
     description: `Visit node ${node.value}`,
     treeState: layoutTree(root), highlights: { activeNodes: [node.id], pathNodes: [...visited] },
-    callStack: nextStack, variables: { visiting: node.value },
+    callStack: nextStack, variables: { root: node.value },
   });
 
   inorderTraversal(node.right, root, visited, snapshots, step, nextStack);
@@ -102,7 +102,7 @@ function preorderTraversal(node: BSTNode | null, root: BSTNode, visited: string[
     stepIndex: step.count++, codeLine: 3, // console.log(root.val);
     description: `Visit node ${node.value}`,
     treeState: layoutTree(root), highlights: { activeNodes: [node.id], pathNodes: [...visited] },
-    callStack: nextStack, variables: { visiting: node.value },
+    callStack: nextStack, variables: { root: node.value },
   });
 
   preorderTraversal(node.left, root, visited, snapshots, step, nextStack);
@@ -130,7 +130,7 @@ function postorderTraversal(node: BSTNode | null, root: BSTNode, visited: string
     stepIndex: step.count++, codeLine: 5, // console.log(root.val);
     description: `Visit node ${node.value}`,
     treeState: layoutTree(root), highlights: { activeNodes: [node.id], pathNodes: [...visited] },
-    callStack: nextStack, variables: { visiting: node.value },
+    callStack: nextStack, variables: { root: node.value },
   });
 }
 
