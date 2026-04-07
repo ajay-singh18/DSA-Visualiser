@@ -38,14 +38,19 @@ export default function GraphVisualizer({ snapshot, nodes, edges, isDirected }: 
     return { stroke, strokeWidth };
   };
 
-  const padding = 100;
-  const maxX = nodes.length > 0 ? Math.max(...nodes.map(n => n.x)) : 800;
-  const maxY = nodes.length > 0 ? Math.max(...nodes.map(n => n.y)) : 600;
-  const contentWidth = Math.max(maxX + padding, 800);
-  const contentHeight = Math.max(maxY + padding, 600);
+  const padding = 80;
+  const minX = nodes.length > 0 ? Math.min(...nodes.map(n => n.x)) : 0;
+  const maxX = nodes.length > 0 ? Math.max(...nodes.map(n => n.x)) : 0;
+  const minY = nodes.length > 0 ? Math.min(...nodes.map(n => n.y)) : 0;
+  const maxY = nodes.length > 0 ? Math.max(...nodes.map(n => n.y)) : 0;
+  const contentWidth = nodes.length > 0 ? maxX - minX + padding * 2 : 200;
+  const contentHeight = nodes.length > 0 ? maxY - minY + padding * 2 : 200;
+
+  const getX = (x: number) => x - minX + padding;
+  const getY = (y: number) => y - minY + padding;
 
   return (
-    <div className="canvas-area" style={{ justifyContent: 'flex-start', alignItems: 'flex-start', overflow: 'auto', padding: 0 }}>
+    <div className="canvas-area" style={{ justifyContent: 'center', alignItems: 'center', overflow: 'auto', padding: 0 }}>
       <div style={{ position: 'relative', minWidth: contentWidth, minHeight: contentHeight, margin: 'auto' }}>
         <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
         <defs>
@@ -62,10 +67,10 @@ export default function GraphVisualizer({ snapshot, nodes, edges, isDirected }: 
           return (
             <g key={`edge-${i}`}>
               <motion.line
-                x1={srcNode.x}
-                y1={srcNode.y}
-                x2={tgtNode.x}
-                y2={tgtNode.y}
+                x1={getX(srcNode.x)}
+                y1={getY(srcNode.y)}
+                x2={getX(tgtNode.x)}
+                y2={getY(tgtNode.y)}
                 stroke={edgeStyle.stroke}
                 strokeWidth={edgeStyle.strokeWidth}
                 markerEnd={isDirected ? 'url(#arrowhead)' : undefined}
@@ -74,8 +79,8 @@ export default function GraphVisualizer({ snapshot, nodes, edges, isDirected }: 
               />
               {edge.weight !== undefined && (
                 <text
-                  x={(srcNode.x + tgtNode.x) / 2}
-                  y={(srcNode.y + tgtNode.y) / 2 - 10}
+                  x={(getX(srcNode.x) + getX(tgtNode.x)) / 2}
+                  y={(getY(srcNode.y) + getY(tgtNode.y)) / 2 - 10}
                   fill="var(--on-surface-variant)"
                   fontSize="12"
                   textAnchor="middle"
@@ -102,9 +107,9 @@ export default function GraphVisualizer({ snapshot, nodes, edges, isDirected }: 
           transition={{ duration: 0.3 }}
           style={{
             position: 'absolute',
-            top: node.y,
-            left: node.x,
-            transform: 'translate(-50%, -50%)', // Center the node naturally
+            top: getY(node.y),
+            left: getX(node.x),
+            transform: 'translate(-50%, -50%)',
             width: 40,
             height: 40,
             borderRadius: '50%',

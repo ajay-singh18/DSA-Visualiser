@@ -152,34 +152,26 @@ export const CODE_LIBRARY: Record<AlgorithmType, CodeSnippets> = {
 }`,
   },
   "merge-sort": {
-    cpp: `void merge(int arr[], int l, int m, int r) {
-  // merge portions...
-}
-void mergeSort(int arr[], int l, int r) {
-    if (l >= r) return;
-    int m = l + (r - l) / 2;
-    mergeSort(arr, l, m);
-    mergeSort(arr, m + 1, r);
-    merge(arr, l, m, r);
+    cpp: `vector<int> mergeSort(vector<int> arr) {
+    if (arr.size() <= 1) return arr;
+    int mid = arr.size() / 2;
+    vector<int> left = mergeSort(vector<int>(arr.begin(), arr.begin() + mid));
+    vector<int> right = mergeSort(vector<int>(arr.begin() + mid, arr.end()));
+    return merge(left, right);
 }`,
-    java: `class Solution {
-    public void mergeSort(int[] arr, int l, int r) {
-        if (l < r) {
-            int m = l + (r - l) / 2;
-            mergeSort(arr, l, m);
-            mergeSort(arr, m + 1, r);
-            merge(arr, l, m, r);
-        }
-    }
+    java: `int[] mergeSort(int[] arr) {
+    if (arr.length <= 1) return arr;
+    int mid = arr.length / 2;
+    int[] left = mergeSort(Arrays.copyOfRange(arr, 0, mid));
+    int[] right = mergeSort(Arrays.copyOfRange(arr, mid, arr.length));
+    return merge(left, right);
 }`,
     python: `def merge_sort(arr):
-    if len(arr) > 1:
-        mid = len(arr) // 2
-        L = arr[:mid]
-        R = arr[mid:]
-        merge_sort(L)
-        merge_sort(R)
-        # merge logic...`,
+    if len(arr) <= 1: return arr
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+    return merge(left, right)`,
     javascript: `function mergeSort(arr) {
     if (arr.length <= 1) return arr;
     const mid = Math.floor(arr.length / 2);

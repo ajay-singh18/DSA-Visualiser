@@ -107,6 +107,8 @@ export default function AssessmentSetup() {
                   <option value={3}>3 Questions (Quick)</option>
                   <option value={5}>5 Questions (Standard)</option>
                   <option value={10}>10 Questions (Deep)</option>
+                  <option value={15}>15 Questions (Challenge)</option>
+                  <option value={20}>20 Questions (Marathon)</option>
                 </select>
               </div>
 

@@ -46,7 +46,7 @@ const ALGORITHMS: { key: string; label: string; type: 'sorting' | 'searching' | 
 ];
 
 export default function Visualizer() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const algoParam = searchParams.get('algo') as AlgorithmType;
 
   const [algorithm, setAlgorithm] = useState<AlgorithmType>(algoParam || 'bubble-sort');
@@ -296,13 +296,15 @@ export default function Visualizer() {
       <div className="split-screen">
         {/* Left: Canvas */}
         <div className="split-left">
-          <div className="canvas-header" style={{ flexWrap: 'wrap' }}>
+          <div className="canvas-header" style={{ flexWrap: 'nowrap', overflowX: 'auto', gap: '16px' }}>
             <select
               className="select-field"
-              style={{ width: 'auto' }}
+              style={{ width: 'auto', padding: '0.5rem' }}
               value={algorithm}
               onChange={(e) => {
-                setAlgorithm(e.target.value as AlgorithmType);
+                const newAlgo = e.target.value as AlgorithmType;
+                setAlgorithm(newAlgo);
+                setSearchParams({ algo: newAlgo });
                 playback.pause();
               }}
             >
@@ -328,12 +330,12 @@ export default function Visualizer() {
               <>
                 <input
                   className="input-field"
-                  style={{ width: '250px' }}
+                  style={{ width: '250px', padding: '0.5rem' }}
                   placeholder="Array: 38, 27..."
                   value={inputArray}
                   onChange={(e) => setInputArray(e.target.value)}
                 />
-                <button className="btn-ghost" onClick={generateRandomArray} title="Generate random array" style={{ padding: '0.5rem 0.75rem' }}>
+                <button className="btn-ghost" onClick={generateRandomArray} title="Generate random array" style={{ padding: '0.5rem' }}>
                   🎲
                 </button>
               </>
@@ -343,7 +345,7 @@ export default function Visualizer() {
             {selectedAlgoMeta?.type === 'searching' && (
               <input
                 className="input-field"
-                style={{ width: '100px' }}
+                style={{ width: '100px', padding: '0.5rem' }}
                 placeholder="Target"
                 type="number"
                 value={searchTarget}
@@ -356,12 +358,12 @@ export default function Visualizer() {
               <>
                 <input
                   className="input-field"
-                  style={{ width: '280px' }}
+                  style={{ width: '220px', padding: '0.5rem' }}
                   placeholder="Edges: A-B:4, B-C:2..."
                   value={graphInput}
                   onChange={(e) => setGraphInput(e.target.value)}
                 />
-                <button className="btn-ghost" onClick={generateRandomGraph} title="Generate random graph" style={{ padding: '0.5rem 0.75rem' }}>
+                <button className="btn-ghost" onClick={generateRandomGraph} title="Generate random graph" style={{ padding: '0.5rem' }}>
                   🎲
                 </button>
               </>
@@ -371,8 +373,8 @@ export default function Visualizer() {
             {selectedAlgoMeta?.type === 'graph' && (
               <input
                 className="input-field"
-                style={{ width: '120px' }}
-                placeholder="Start Node (A)"
+                style={{ width: '90px', padding: '0.5rem' }}
+                placeholder="Start (A)"
                 value={startNode}
                 onChange={(e) => setStartNode(e.target.value)}
               />
@@ -382,8 +384,8 @@ export default function Visualizer() {
             {algorithm === 'a-star' && (
               <input
                 className="input-field"
-                style={{ width: '120px' }}
-                placeholder="Target Node (E)"
+                style={{ width: '90px', padding: '0.5rem' }}
+                placeholder="Target (E)"
                 value={aStarTarget}
                 onChange={(e) => setAStarTarget(e.target.value)}
               />
@@ -394,22 +396,23 @@ export default function Visualizer() {
               <>
                 <input
                   className="input-field"
-                  style={{ width: '400px' }}
-                  placeholder="e.g. 50, 30, 70, null, 40..."
+                  style={{ width: '300px', padding: '0.5rem' }}
+                  placeholder="e.g. 50, 30..."
                   value={treeValues}
                   onChange={(e) => setTreeValues(e.target.value)}
                 />
-                <button className="btn-ghost" onClick={generateRandomTree} title="Generate random tree values" style={{ padding: '0.5rem 0.75rem' }}>
+                <button className="btn-ghost" onClick={generateRandomTree} title="Generate random tree values" style={{ padding: '0.5rem' }}>
                   🎲
                 </button>
               </>
             )}
 
+
             {/* BST Delete target */}
             {algorithm === 'bst-delete' && (
               <input
                 className="input-field"
-                style={{ width: '100px' }}
+                style={{ width: '110px', padding: '0.5rem' }}
                 placeholder="Delete key"
                 type="number"
                 value={deleteTarget}
@@ -421,7 +424,7 @@ export default function Visualizer() {
             {algorithm === 'bst-insert' && (
               <input
                 className="input-field"
-                style={{ width: '130px' }}
+                style={{ width: '140px', padding: '0.5rem' }}
                 placeholder="Insert key (optional)"
                 type="number"
                 value={insertTarget}
@@ -463,7 +466,7 @@ export default function Visualizer() {
               />
             )}
 
-            <button className="btn-gradient" onClick={handleRun} disabled={loading}>
+            <button className="btn-gradient" style={{ padding: '0.4rem 1rem', whiteSpace: 'nowrap', fontSize: '0.85rem' }} onClick={handleRun} disabled={loading}>
               {loading ? 'Running...' : '▶ Run'}
             </button>
 
@@ -492,7 +495,9 @@ export default function Visualizer() {
               style={{
                 background: 'linear-gradient(135deg, rgba(167,139,250,0.25), rgba(96,165,250,0.25))',
                 border: '1px solid rgba(167,139,250,0.4)',
-                padding: 'var(--space-3) var(--space-4)',
+                padding: '0.4rem 1rem',
+                whiteSpace: 'nowrap',
+                fontSize: '0.85rem'
               }}
             >
               {loadingAI ? '⏳ Thinking...' : '✨ Ask AI'}
@@ -546,7 +551,7 @@ export default function Visualizer() {
               </div>
             )}
             
-            <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ flex: 1, position: 'relative', overflow: 'auto' }}>
               {selectedAlgoMeta?.type === 'graph' ? (
                 <GraphVisualizer
                   snapshot={playback.currentSnapshot}
