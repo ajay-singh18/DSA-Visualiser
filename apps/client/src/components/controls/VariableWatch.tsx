@@ -28,42 +28,41 @@ export default function VariableWatch({ snapshot }: VariableWatchProps) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      {/* Variable List */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      {/* Variable Grid */}
       {Object.keys(vars).length > 0 && (
         <div style={{ 
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '0.5rem',
           background: 'var(--glass-bg)', 
-          padding: '1rem', 
+          padding: '0.75rem', 
           borderRadius: 'var(--radius-md)', 
           border: '1px solid var(--glass-border)',
           boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
         }}>
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '0.5rem' 
-          }}>
-            {Object.entries(vars).map(([key, val]) => (
-              <motion.div 
-                key={key}
-                initial={{ opacity: 0, x: -5 }}
-                animate={{ opacity: 1, x: 0 }}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.85rem',
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '4px',
-                  background: 'rgba(255,255,255,0.03)'
-                }}
-              >
-                <span style={{ color: 'var(--secondary)', fontWeight: 500 }}>{key}</span>
-                <span style={{ color: 'var(--on-surface)', fontWeight: 600 }}>{String(val)}</span>
-              </motion.div>
-            ))}
-          </div>
+          {Object.entries(vars).map(([key, val]) => (
+            <motion.div 
+              key={key}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.75rem',
+                padding: '0.35rem 0.6rem',
+                borderRadius: '6px',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.05)',
+                overflow: 'hidden'
+              }}
+            >
+              <span style={{ color: 'var(--secondary)', fontWeight: 600, opacity: 0.9, marginRight: '4px' }}>{key}</span>
+              <span style={{ color: 'var(--on-surface)', fontWeight: 700, textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>{String(val)}</span>
+            </motion.div>
+          ))}
         </div>
       )}
 

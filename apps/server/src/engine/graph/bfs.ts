@@ -34,27 +34,27 @@ export function runBFS(
   });
 
   while (queue.length > 0) {
-    const node = queue.shift()!;
+    const v = queue.shift()!;
 
     snapshots.push({
       stepIndex: step++,
       codeLine: 5, // shift
-      description: `Dequeued node "${node}" — processing`,
-      highlights: { currentNode: node, queue: [...queue], visited: Array.from(visited) },
-      variables: { currentNode: node, queue: queue.join(', '), visited: Array.from(visited).join(', ') },
+      description: `Dequeued node "${v}" — processing`,
+      highlights: { currentNode: v, queue: [...queue], visited: Array.from(visited) },
+      variables: { v, queue: queue.join(', '), visited: Array.from(visited).join(', ') },
     });
 
-    for (const neighbor of adj.get(node) || []) {
-      if (!visited.has(neighbor)) {
-        visited.add(neighbor);
-        queue.push(neighbor);
+    for (const nei of adj.get(v) || []) {
+      if (!visited.has(nei)) {
+        visited.add(nei);
+        queue.push(nei);
 
         snapshots.push({
           stepIndex: step++,
           codeLine: 9, // queue push
-          description: `Discovered neighbor "${neighbor}" → added to queue`,
-          highlights: { currentNode: node, queue: [...queue], visited: Array.from(visited) },
-          variables: { currentNode: node, neighbor, queue: queue.join(', '), visited: Array.from(visited).join(', ') },
+          description: `Discovered neighbor "${nei}" → added to queue`,
+          highlights: { currentNode: v, queue: [...queue], visited: Array.from(visited) },
+          variables: { v, nei, queue: queue.join(', '), visited: Array.from(visited).join(', ') },
         });
       }
     }

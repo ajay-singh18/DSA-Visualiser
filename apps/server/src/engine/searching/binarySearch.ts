@@ -18,35 +18,35 @@ export function runBinarySearch(data: number[], target: number): { snapshots: Sn
   }
 
   addSnapshot(1, `Binary Search requires a sorted array. Array sorted: [${arr.join(', ')}]. Looking for ${target}.`, {}, { target });
+  const x = target;
+  addSnapshot(1, `Binary Search requires a sorted array. Array sorted: [${arr.join(', ')}]. Looking for ${x}.`, {}, { x });
 
-  let left = 0;
-  let right = arr.length - 1;
+  let l = 0;
+  let r = arr.length - 1;
 
-  while (left <= right) {
-    const mid = Math.floor((left + right) / 2);
-    addSnapshot(3, `Search space is between indices ${left} and ${right}.`, { swapping: [left, right] }, { left, right, mid, target });
-    
-    addSnapshot(4, `Checking index ${mid} (value: ${arr[mid]}).`, { comparing: [mid], swapping: [left, right] }, { left, right, mid, target, 'arr[mid]': arr[mid] });
+  while (l <= r) {
+    const m = Math.floor((l + r) / 2);
+    const mValue = arr[m];
 
-    if (arr[mid] === target) {
-      addSnapshot(5, `Target ${target} found at index ${mid}!`, { sorted: [mid] }, { left, right, mid, target, found: 'Yes' });
-      break;
+    addSnapshot(3, `Calculated middle index m = floor((${l} + ${r}) / 2) = ${m}.`, { comparing: [m] }, { l, r, m, mValue, x });
+
+    if (mValue === x) {
+      addSnapshot(4, `Found target ${x} at index ${m}!`, { sorted: [m] }, { l, r, m, mValue, x, status: 'Found' });
+      return { snapshots };
     }
 
-    if (arr[mid] < target) {
-      addSnapshot(6, `${arr[mid]} < ${target}, searching right half.`, { comparing: [mid] }, { left, right, mid, target, action: 'Move Left' });
-      left = mid + 1;
+    if (mValue < x) {
+      addSnapshot(5, `Since arr[m] (${mValue}) < ${x}, look in the right half.`, { comparing: [m] }, { l, r, m, mValue, x });
+      l = m + 1;
+      addSnapshot(5, `Updated l to ${l}.`, {}, { l, r, x });
     } else {
-      addSnapshot(7, `${arr[mid]} > ${target}, searching left half.`, { comparing: [mid] }, { left, right, mid, target, action: 'Move Right' });
-      right = mid - 1;
+      addSnapshot(6, `Since arr[m] (${mValue}) > ${x}, look in the left half.`, { comparing: [m] }, { l, r, m, mValue, x });
+      r = m - 1;
+      addSnapshot(6, `Updated r to ${r}.`, {}, { l, r, x });
     }
   }
 
-  if (left > right) {
-    addSnapshot(9, `Search space exhausted. Target ${target} not found.`, {}, { left, right, target, found: 'No' });
-  }
-
-  
+  addSnapshot(8, `Target ${x} not found in the array.`, {}, { x, status: 'Not Found' });
 
   return { snapshots };
 }

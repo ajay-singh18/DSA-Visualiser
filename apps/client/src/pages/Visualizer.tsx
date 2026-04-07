@@ -608,16 +608,25 @@ export default function Visualizer() {
           </div>
 
           <div style={{
-            padding: '1rem',
+            padding: '0.75rem 1rem',
             background: 'rgba(0,0,0,0.15)',
             borderTop: '1px solid var(--glass-border)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.75rem',
-            maxHeight: '300px',
+            gap: '0.5rem',
             overflowY: 'auto'
           }}>
-            <h4 style={{ margin: 0, color: 'var(--secondary)', fontFamily: 'var(--font-display)', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Variable Watch</h4>
+            <h4 style={{ 
+              margin: 0, 
+              color: 'var(--secondary)', 
+              fontFamily: 'var(--font-display)', 
+              fontSize: '0.85rem', 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.1em',
+              opacity: 0.8
+            }}>
+              Variable Watch
+            </h4>
             <VariableWatch snapshot={playback.currentSnapshot} />
           </div>
           

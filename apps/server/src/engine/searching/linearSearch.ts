@@ -12,25 +12,26 @@ export function runLinearSearch(data: number[], target: number): { snapshots: Sn
       description,
       arrayState: [...arr],
       highlights,
-      variables: { ...variables, n, target },
+      variables: { ...variables, n, x: target },
     });
   }
 
   const n = arr.length;
-  addSnapshot(1, `Starting Linear Search for target ${target} in array of size ${n}.`, {}, { i: 'N/A' });
+  const x = target;
+  addSnapshot(1, `Starting Linear Search for ${x}.`, {}, { x });
 
   for (let i = 0; i < n; i++) {
-    addSnapshot(2, `Checking element at index ${i} (value: ${arr[i]}).`, { comparing: [i] }, { i, 'arr[i]': arr[i] });
+    addSnapshot(3, `Comparing arr[${i}] (${arr[i]}) with ${x}.`, { comparing: [i] }, { i, 'arr[i]': arr[i], x });
 
-    if (arr[i] === target) {
-      addSnapshot(3, `Found target ${target} at index ${i}!`, { sorted: [i] }, { i, 'arr[i]': arr[i], found: 'Yes' });
+    if (arr[i] === x) {
+      addSnapshot(4, `Found target ${x} at index ${i}!`, { sorted: [i] }, { i, x, found: 'Yes' });
       
       
       return { snapshots };
     }
   }
 
-  addSnapshot(5, `Target ${target} not found in array.`, {}, { i: n, found: 'No' });
+  addSnapshot(6, `Target ${x} not found in the array.`, {}, { x, found: 'No' });
 
   
 

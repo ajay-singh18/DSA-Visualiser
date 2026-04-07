@@ -24,23 +24,23 @@ export function runSelectionSort(data: number[]): { snapshots: Snapshot[] } {
   for (let i = 0; i < n - 1; i++) {
     addSnapshot(3, `Finding the smallest element in the unsorted portion (indices ${i} to ${n-1}).`, { sorted: [...sorted] }, { i });
     
-    let minIdx = i;
-    addSnapshot(4, `Assuming element at index ${i} is the minimum.`, { comparing: [i], sorted: [...sorted] }, { i, minIdx });
+    let min_idx = i;
+    addSnapshot(4, `Assuming element at index ${i} is the minimum.`, { comparing: [i], sorted: [...sorted] }, { i, min_idx });
 
     for (let j = i + 1; j < n; j++) {
-      addSnapshot(5, `Comparing arr[${j}] with current minimum arr[${minIdx}].`, { comparing: [j, minIdx], sorted: [...sorted] }, { i, j, minIdx });
-      if (arr[j] < arr[minIdx]) {
-        minIdx = j;
-        addSnapshot(5, `Found new minimum at index ${minIdx}.`, { comparing: [minIdx], sorted: [...sorted] }, { i, j, minIdx });
+      addSnapshot(5, `Comparing arr[${j}] with current minimum arr[${min_idx}].`, { comparing: [j, min_idx], sorted: [...sorted] }, { i, j, min_idx });
+      if (arr[j] < arr[min_idx]) {
+        min_idx = j;
+        addSnapshot(5, `Found new minimum at index ${min_idx}.`, { comparing: [min_idx], sorted: [...sorted] }, { i, j, min_idx });
       }
     }
 
-    if (minIdx !== i) {
-      addSnapshot(7, `Swapping current element arr[${i}] with minimum arr[${minIdx}].`, { swapping: [i, minIdx], sorted: [...sorted] }, { i, minIdx, swapping: 'Yes' });
-      [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
-      addSnapshot(7, `Swap complete.`, { sorted: [...sorted, i] }, { i, minIdx, swapped: 'Yes' });
+    if (min_idx !== i) {
+      addSnapshot(7, `Swapping current element arr[${i}] with minimum arr[${min_idx}].`, { swapping: [i, min_idx], sorted: [...sorted] }, { i, min_idx, swapping: 'Yes' });
+      [arr[i], arr[min_idx]] = [arr[min_idx], arr[i]];
+      addSnapshot(7, `Swap complete.`, { sorted: [...sorted, i] }, { i, min_idx, swapped: 'Yes' });
     } else {
-      addSnapshot(7, `Element at index ${i} is already the minimum, no swap needed.`, { sorted: [...sorted, i] }, { i, minIdx, status: 'Already min' });
+      addSnapshot(7, `Element at index ${i} is already the minimum, no swap needed.`, { sorted: [...sorted, i] }, { i, min_idx, status: 'Already min' });
     }
     sorted.push(i);
   }
