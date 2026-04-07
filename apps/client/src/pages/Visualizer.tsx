@@ -599,8 +599,8 @@ export default function Visualizer() {
         </div>
 
         {/* Right: Code editor and Metrics */}
-        <div className="split-right" style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ flex: 1, minHeight: 0 }}>
+        <div className="split-right" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+          <div style={{ flex: '0 0 45%', minHeight: 0, borderBottom: '1px solid var(--glass-border)' }}>
             <CodePanel
               languages={languages}
               currentLine={playback.currentSnapshot?.codeLine}
@@ -608,22 +608,23 @@ export default function Visualizer() {
           </div>
 
           <div style={{
-            padding: '0.75rem 1rem',
-            background: 'rgba(0,0,0,0.15)',
-            borderTop: '1px solid var(--glass-border)',
+            flex: 1,
+            padding: '0.5rem 1rem',
+            background: 'rgba(0,0,0,0.1)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.5rem',
-            overflowY: 'auto'
+            gap: '0.4rem',
+            overflowY: 'auto',
+            minHeight: 0
           }}>
             <h4 style={{ 
               margin: 0, 
               color: 'var(--secondary)', 
               fontFamily: 'var(--font-display)', 
-              fontSize: '0.85rem', 
+              fontSize: '0.75rem', 
               textTransform: 'uppercase', 
               letterSpacing: '0.1em',
-              opacity: 0.8
+              opacity: 0.7
             }}>
               Variable Watch
             </h4>
@@ -631,30 +632,31 @@ export default function Visualizer() {
           </div>
           
           <div style={{
-            padding: '1rem',
+            padding: '0.6rem 1rem',
             background: 'rgba(0,0,0,0.2)',
             borderTop: '1px solid var(--glass-border)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.75rem'
+            gap: '0.5rem',
+            flexShrink: 0
           }}>
-            <h4 style={{ margin: 0, color: 'var(--primary)', fontFamily: 'var(--font-display)', fontSize: '1.1rem' }}>Performance Metrics</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-              <div style={{ background: 'var(--glass-bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
-                <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time Taken</div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? 'var(--on-surface)' : 'var(--on-surface-variant)', marginTop: '0.25rem' }}>{metrics ? `${metrics.timeTakenMs}ms` : '-- ms'}</div>
+            <h4 style={{ margin: 0, color: 'var(--primary)', fontFamily: 'var(--font-display)', fontSize: '0.9rem' }}>Performance Metrics</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              <div style={{ background: 'var(--glass-bg)', padding: '0.4rem 0.6rem', borderRadius: '4px', border: '1px solid var(--glass-border)' }}>
+                <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time Taken</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: metrics ? 'var(--on-surface)' : 'var(--on-surface-variant)', marginTop: '0.1rem' }}>{metrics ? `${metrics.timeTakenMs}ms` : '-- ms'}</div>
               </div>
-              <div style={{ background: 'var(--glass-bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
-                <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Operations</div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? 'var(--on-surface)' : 'var(--on-surface-variant)', marginTop: '0.25rem' }}>{metrics ? `${metrics.comparisons}C, ${metrics.swaps}S` : '--'}</div>
+              <div style={{ background: 'var(--glass-bg)', padding: '0.4rem 0.6rem', borderRadius: '4px', border: '1px solid var(--glass-border)' }}>
+                <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Operations</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: metrics ? 'var(--on-surface)' : 'var(--on-surface-variant)', marginTop: '0.1rem' }}>{metrics ? `${metrics.comparisons}C, ${metrics.swaps}S` : '--'}</div>
               </div>
-              <div style={{ background: 'var(--glass-bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
-                <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time Complexity</div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? 'var(--secondary)' : 'var(--on-surface-variant)', marginTop: '0.25rem' }}>{metrics ? metrics.timeComplexity : '--'}</div>
+              <div style={{ background: 'var(--glass-bg)', padding: '0.4rem 0.6rem', borderRadius: '4px', border: '1px solid var(--glass-border)' }}>
+                <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time Complexity</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: 'var(--secondary)', marginTop: '0.1rem' }}>{metrics ? metrics.timeComplexity : '--'}</div>
               </div>
-              <div style={{ background: 'var(--glass-bg)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
-                <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Space Complexity</div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.1rem', color: metrics ? 'var(--tertiary)' : 'var(--on-surface-variant)', marginTop: '0.25rem' }}>{metrics ? metrics.spaceComplexity : '--'}</div>
+              <div style={{ background: 'var(--glass-bg)', padding: '0.4rem 0.6rem', borderRadius: '4px', border: '1px solid var(--glass-border)' }}>
+                <div style={{ color: 'var(--on-surface-variant)', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Space Complexity</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: 'var(--tertiary)', marginTop: '0.1rem' }}>{metrics ? metrics.spaceComplexity : '--'}</div>
               </div>
             </div>
           </div>
