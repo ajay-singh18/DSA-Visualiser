@@ -9,6 +9,7 @@ import layoutRoutes from '../src/routes/layouts.js';
 import algorithmRoutes from '../src/routes/algorithms.js';
 import bookmarkRoutes from '../src/routes/bookmarks.js';
 import assessmentRoutes from '../src/routes/assessments.js';
+import aiRoutes from '../src/routes/ai.js';
 import { errorHandler } from '../src/middleware/errorHandler.js';
 
 const app = express();
@@ -56,6 +57,7 @@ app.use('/api/layouts', layoutRoutes);
 app.use('/api/algorithms', algorithmRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/assessments', assessmentRoutes);
+app.use('/api/ai', aiRoutes);
 
 // ── Error handler ──
 app.use(errorHandler);
