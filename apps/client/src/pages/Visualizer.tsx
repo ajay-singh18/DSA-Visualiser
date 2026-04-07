@@ -611,6 +611,7 @@ export default function Visualizer() {
             flex: 1,
             padding: '0.5rem 1rem',
             background: 'rgba(0,0,0,0.1)',
+            borderTop: '1px solid var(--glass-border)',
             display: 'flex',
             flexDirection: 'column',
             gap: '0.4rem',

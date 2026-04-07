@@ -26,11 +26,14 @@ void solve() {
 
 export const CODE_LIBRARY: Record<AlgorithmType, CodeSnippets> = {
   "bubble-sort": {
-    cpp: `void bubbleSort(int arr[], int n) {
-    for (int i = 0; i < n - 1; i++)
-        for (int j = 0; j < n - i - 1; j++)
+    cpp: `void bubbleSort(int arr[]) {
+    int n = sizeof(arr)/sizeof(arr[0]);
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
             if (arr[j] > arr[j + 1])
                 swap(arr[j], arr[j + 1]);
+        }
+    }
 }`,
     java: `class Solution {
     public void bubbleSort(int[] arr) {
@@ -63,7 +66,8 @@ export const CODE_LIBRARY: Record<AlgorithmType, CodeSnippets> = {
 }`,
   },
   "selection-sort": {
-    cpp: `void selectionSort(int arr[], int n) {
+    cpp: `void selectionSort(int arr[]) {
+    int n = sizeof(arr)/sizeof(arr[0]);
     for (int i = 0; i < n - 1; i++) {
         int min_idx = i;
         for (int j = i + 1; j < n; j++)
@@ -87,9 +91,10 @@ export const CODE_LIBRARY: Record<AlgorithmType, CodeSnippets> = {
     }
 }`,
     python: `def selection_sort(arr):
-    for i in range(len(arr) - 1):
+    n = len(arr)
+    for i in range(n - 1):
         min_idx = i
-        for j in range(i + 1, len(arr)):
+        for j in range(i + 1, n):
             if arr[j] < arr[min_idx]:
                 min_idx = j
         arr[i], arr[min_idx] = arr[min_idx], arr[i]`,
@@ -106,7 +111,8 @@ export const CODE_LIBRARY: Record<AlgorithmType, CodeSnippets> = {
 }`,
   },
   "insertion-sort": {
-    cpp: `void insertionSort(int arr[], int n) {
+    cpp: `void insertionSort(int arr[]) {
+    int n = sizeof(arr)/sizeof(arr[0]);
     for (int i = 1; i < n; i++) {
         int key = arr[i];
         int j = i - 1;
@@ -131,7 +137,8 @@ export const CODE_LIBRARY: Record<AlgorithmType, CodeSnippets> = {
     }
 }`,
     python: `def insertion_sort(arr):
-    for i in range(1, len(arr)):
+    n = len(arr)
+    for i in range(1, n):
         key = arr[i]
         j = i - 1
         while j >= 0 and arr[j] > key:
@@ -152,32 +159,106 @@ export const CODE_LIBRARY: Record<AlgorithmType, CodeSnippets> = {
 }`,
   },
   "merge-sort": {
-    cpp: `vector<int> mergeSort(vector<int> arr) {
-    if (arr.size() <= 1) return arr;
-    int mid = arr.size() / 2;
-    vector<int> left = mergeSort(vector<int>(arr.begin(), arr.begin() + mid));
-    vector<int> right = mergeSort(vector<int>(arr.begin() + mid, arr.end()));
-    return merge(left, right);
+    cpp: `void merge(int arr[], int l, int m, int r) {
+    int i = 0, j = 0, k = l;
+    int n1 = m - l + 1, n2 = r - m;
+    int L[n1], R[n2];
+    for (i = 0; i < n1; i++) L[i] = arr[l + i];
+    for (j = 0; j < n2; j++) R[j] = arr[m + 1 + j];
+    i = 0; j = 0;
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) arr[k++] = L[i++];
+        else arr[k++] = R[j++];
+    }
+    while (i < n1) arr[k++] = L[i++];
+    while (j < n2) arr[k++] = R[j++];
+}
+void mergeSortRecursive(int arr[], int l, int r) {
+    if (l < r) {
+        int m = l + (r - l) / 2;
+        mergeSortRecursive(arr, l, m);
+        mergeSortRecursive(arr, m + 1, r);
+        merge(arr, l, m, r);
+    }
+}
+void mergeSort(int arr[]) {
+    int n = sizeof(arr)/sizeof(arr[0]);
+    int l = 0, r = n - 1;
+    mergeSortRecursive(arr, l, r);
 }`,
-    java: `int[] mergeSort(int[] arr) {
-    if (arr.length <= 1) return arr;
-    int mid = arr.length / 2;
-    int[] left = mergeSort(Arrays.copyOfRange(arr, 0, mid));
-    int[] right = mergeSort(Arrays.copyOfRange(arr, mid, arr.length));
-    return merge(left, right);
+    java: `class Solution {
+    void merge(int arr[], int l, int m, int r) {
+        int n1 = m - l + 1, n2 = r - m;
+        int L[] = new int[n1], R[] = new int[n2];
+        for (int i = 0; i < n1; i++) L[i] = arr[l + i];
+        for (int j = 0; j < n2; j++) R[j] = arr[m + 1 + j];
+        int i = 0, j = 0, k = l;
+        while (i < n1 && j < n2) {
+            if (L[i] <= R[j]) arr[k++] = L[i++];
+            else arr[k++] = R[j++];
+        }
+        while (i < n1) arr[k++] = L[i++];
+        while (j < n2) arr[k++] = R[j++];
+    }
+    void mergeSort(int[] arr) {
+        int n = arr.length;
+        int l = 0, r = n - 1;
+        mergeSortRecursive(arr, l, r);
+    }
+    void mergeSortRecursive(int[] arr, int l, int r) {
+        if (l < r) {
+            int m = l + (r - l) / 2;
+            mergeSortRecursive(arr, l, m);
+            mergeSortRecursive(arr, m + 1, r);
+            merge(arr, l, m, r);
+        }
+    }
 }`,
     python: `def merge_sort(arr):
-    if len(arr) <= 1: return arr
-    mid = len(arr) // 2
-    left = merge_sort(arr[:mid])
-    right = merge_sort(arr[mid:])
-    return merge(left, right)`,
-    javascript: `function mergeSort(arr) {
-    if (arr.length <= 1) return arr;
-    const mid = Math.floor(arr.length / 2);
-    const left = mergeSort(arr.slice(0, mid));
-    const right = mergeSort(arr.slice(mid));
-    return merge(left, right);
+    n = len(arr)
+    def recursive_sort(a):
+        if len(a) > 1:
+            mid = len(a) // 2
+            L = a[:mid]
+            R = a[mid:]
+            recursive_sort(L)
+            recursive_sort(R)
+            i = j = k = 0
+            while i < len(L) and j < len(R):
+                if L[i] <= R[j]:
+                    a[k] = L[i]; i += 1
+                else:
+                    a[k] = R[j]; j += 1
+                k += 1
+            while i < len(L):
+                a[k] = L[i]; i += 1; k += 1
+            while j < len(R):
+                a[k] = R[j]; j += 1; k += 1
+    recursive_sort(arr)`,
+    javascript: `function merge(arr, l, m, r) {
+    let L = arr.slice(l, m + 1);
+    let R = arr.slice(m + 1, r + 1);
+    let i = 0, j = 0, k = l;
+    while (i < L.length && j < R.length) {
+        if (L[i] <= R[j]) arr[k++] = L[i++];
+        else arr[k++] = R[j++];
+    }
+    while (i < L.length) arr[k++] = L[i++];
+    while (j < R.length) arr[k++] = R[j++];
+}
+function mergeSort(arr) {
+    const n = arr.length;
+    let l = 0, r = n - 1;
+    function recursiveSort(left, right) {
+        if (left < right) {
+            let m = Math.floor(left + (right - left) / 2);
+            recursiveSort(left, m);
+            recursiveSort(m + 1, right);
+            merge(arr, left, m, right);
+        }
+    }
+    recursiveSort(l, r);
+    return arr;
 }`,
   },
   "quick-sort": {
@@ -193,39 +274,73 @@ export const CODE_LIBRARY: Record<AlgorithmType, CodeSnippets> = {
     swap(arr[i + 1], arr[high]);
     return (i + 1);
 }
-
-void quickSort(int arr[], int low, int high) {
+void quickSortRecursive(int arr[], int low, int high) {
     if (low < high) {
         int pi = partition(arr, low, high);
-        quickSort(arr, low, pi - 1);
-        quickSort(arr, pi + 1, high);
+        quickSortRecursive(arr, low, pi - 1);
+        quickSortRecursive(arr, pi + 1, high);
     }
+}
+void quickSort(int arr[]) {
+    int n = sizeof(arr)/sizeof(arr[0]);
+    int low = 0, high = n - 1;
+    quickSortRecursive(arr, low, high);
 }`,
     java: `class Solution {
-    public void quickSort(int[] arr, int low, int high) {
+    int partition(int arr[], int low, int high) {
+        int pivot = arr[high];
+        int i = (low - 1);
+        for (int j = low; j <= high - 1; j++) {
+            if (arr[j] < pivot) {
+                i++;
+                int temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+        int temp = arr[i + 1];
+        arr[i + 1] = arr[high];
+        arr[high] = temp;
+        return (i + 1);
+    }
+    void quickSort(int[] arr) {
+        int n = arr.length;
+        int low = 0, high = n - 1;
+        quickSortRecursive(arr, low, high);
+    }
+    void quickSortRecursive(int[] arr, int low, int high) {
         if (low < high) {
             int pi = partition(arr, low, high);
-            quickSort(arr, low, pi - 1);
-            quickSort(arr, pi + 1, high);
+            quickSortRecursive(arr, low, pi - 1);
+            quickSortRecursive(arr, pi + 1, high);
         }
     }
 }`,
-    python: `def quick_sort(arr, low, high):
-    if low < high:
-        pi = partition(arr, low, high)
-        quick_sort(arr, low, pi - 1)
-        quick_sort(arr, pi + 1, high)`,
-    javascript: `function quickSort(arr, low = 0, high = arr.length - 1) {
-    if (low < high) {
-        let pi = partition(arr, low, high);
-        quickSort(arr, low, pi - 1);
-        quickSort(arr, pi + 1, high);
+    python: `def quick_sort(arr):
+    n = len(arr)
+    def recursive_sort(a, low, high):
+        if low < high:
+            pi = partition(a, low, high)
+            recursive_sort(a, low, pi - 1)
+            recursive_sort(a, pi + 1, high)
+    recursive_sort(arr, 0, n - 1)`,
+    javascript: `function quickSort(arr) {
+    const n = arr.length;
+    let low = 0, high = n - 1;
+    function recursiveSort(a, l, h) {
+        if (l < h) {
+            let pi = partition(a, l, h);
+            recursiveSort(a, l, pi - 1);
+            recursiveSort(a, pi + 1, h);
+        }
     }
+    recursiveSort(arr, low, high);
     return arr;
 }`,
   },
   "linear-search": {
-    cpp: `int linearSearch(int arr[], int n, int x) {
+    cpp: `int linearSearch(int arr[], int x) {
+    int n = sizeof(arr)/sizeof(arr[0]);
     for (int i = 0; i < n; i++)
         if (arr[i] == x)
             return i;
@@ -252,7 +367,9 @@ void quickSort(int arr[], int low, int high) {
 }`,
   },
   "binary-search": {
-    cpp: `int binarySearch(int arr[], int l, int r, int x) {
+    cpp: `int binarySearch(int arr[], int x) {
+    int n = sizeof(arr)/sizeof(arr[0]);
+    int l = 0, r = n - 1;
     while (l <= r) {
         int m = l + (r - l) / 2;
         if (arr[m] == x) return m;
@@ -273,7 +390,8 @@ void quickSort(int arr[], int low, int high) {
         return -1;
     }
 }`,
-    python: `def binary_search(arr, l, r, x):
+    python: `def binary_search(arr, x):
+    l, r = 0, len(arr) - 1
     while l <= r:
         m = l + (r - l) // 2
         if arr[m] == x:
@@ -389,7 +507,8 @@ void DFS(int v, vector<vector<int>>& adj) {
 }`,
   },
   dijkstra: {
-    cpp: `void dijkstra(vector<vector<pair<int,int>>>& adj, int V, int src) {
+    cpp: `void dijkstra(vector<vector<pair<int,int>>>& adj, int src) {
+    int V = adj.size();
     priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
     vector<int> dist(V, INT_MAX);
     pq.push(make_pair(0, src));
