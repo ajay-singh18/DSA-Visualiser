@@ -5,9 +5,9 @@ import ArrayVisualizer from '../components/canvas/ArrayVisualizer';
 import GraphVisualizer from '../components/canvas/GraphVisualizer';
 import TreeVisualizer from '../components/canvas/TreeVisualizer';
 import DPTableVisualizer from '../components/canvas/DPTableVisualizer';
-import StateOverlay from '../components/canvas/StateOverlay';
 import CodePanel from '../components/editor/CodePanel';
 import PlaybackBar from '../components/controls/PlaybackBar';
+import VariableWatch from '../components/controls/VariableWatch';
 import { usePlayback } from '../hooks/usePlayback';
 import Navbar from '../components/Navbar';
 import apiClient from '../api/client';
@@ -580,12 +580,6 @@ export default function Visualizer() {
                 />
               )}
             </div>
-
-            {/* Static variables and call stack tracing card */}
-            <StateOverlay 
-              snapshot={playback.currentSnapshot} 
-              algorithmName={selectedAlgoMeta?.label || algorithm} 
-            />
           </div>
 
           <PlaybackBar
@@ -611,6 +605,20 @@ export default function Visualizer() {
               languages={languages}
               currentLine={playback.currentSnapshot?.codeLine}
             />
+          </div>
+
+          <div style={{
+            padding: '1rem',
+            background: 'rgba(0,0,0,0.15)',
+            borderTop: '1px solid var(--glass-border)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem',
+            maxHeight: '300px',
+            overflowY: 'auto'
+          }}>
+            <h4 style={{ margin: 0, color: 'var(--secondary)', fontFamily: 'var(--font-display)', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Variable Watch</h4>
+            <VariableWatch snapshot={playback.currentSnapshot} />
           </div>
           
           <div style={{

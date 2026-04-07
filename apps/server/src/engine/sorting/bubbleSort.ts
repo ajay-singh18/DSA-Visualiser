@@ -18,6 +18,7 @@ export function runBubbleSort(input: number[]): {
     description: `Starting Bubble Sort on array of ${n} elements`,
     arrayState: [...arr],
     highlights: { sorted: [] },
+    variables: { n },
   });
 
   for (let i = 0; i < n - 1; i++) {
@@ -32,6 +33,7 @@ export function runBubbleSort(input: number[]): {
           comparing: [j, j + 1],
           sorted: Array.from({ length: i }, (_, k) => n - 1 - k),
         },
+        variables: { i, j, 'arr[j]': arr[j], 'arr[j+1]': arr[j+1] },
       });
 
       if (arr[j] > arr[j + 1]) {
@@ -46,6 +48,7 @@ export function runBubbleSort(input: number[]): {
             swapping: [j, j + 1],
             sorted: Array.from({ length: i }, (_, k) => n - 1 - k),
           },
+          variables: { i, j, swapping: 'Yes' },
         });
       }
     }
@@ -59,6 +62,7 @@ export function runBubbleSort(input: number[]): {
       highlights: {
         sorted: Array.from({ length: i + 1 }, (_, k) => n - 1 - k),
       },
+      variables: { i, sortedIndex: n - 1 - i },
     });
   }
 
@@ -68,6 +72,7 @@ export function runBubbleSort(input: number[]): {
     description: 'Bubble Sort complete!',
     arrayState: [...arr],
     highlights: { sorted: Array.from({ length: n }, (_, k) => k) },
+    variables: { status: 'Complete' },
   });
 
   return { snapshots };

@@ -30,6 +30,7 @@ export function runBFS(
     codeLine: 1, // function bfs
     description: `Starting BFS from node "${startNodeId}"`,
     highlights: { currentNode: startNodeId, queue: [...queue], visited: [...visited] },
+    variables: { queue: queue.join(', '), visited: Array.from(visited).join(', ') },
   });
 
   while (queue.length > 0) {
@@ -39,7 +40,8 @@ export function runBFS(
       stepIndex: step++,
       codeLine: 5, // shift
       description: `Dequeued node "${node}" — processing`,
-      highlights: { currentNode: node, queue: [...queue], visited: [...visited] },
+      highlights: { currentNode: node, queue: [...queue], visited: Array.from(visited) },
+      variables: { currentNode: node, queue: queue.join(', '), visited: Array.from(visited).join(', ') },
     });
 
     for (const neighbor of adj.get(node) || []) {
@@ -51,7 +53,8 @@ export function runBFS(
           stepIndex: step++,
           codeLine: 9, // queue push
           description: `Discovered neighbor "${neighbor}" → added to queue`,
-          highlights: { currentNode: node, queue: [...queue], visited: [...visited] },
+          highlights: { currentNode: node, queue: [...queue], visited: Array.from(visited) },
+          variables: { currentNode: node, neighbor, queue: queue.join(', '), visited: Array.from(visited).join(', ') },
         });
       }
     }
@@ -61,7 +64,8 @@ export function runBFS(
     stepIndex: step++,
     codeLine: 12, // end of func
     description: 'BFS complete! All reachable nodes visited.',
-    highlights: { visited: [...visited] },
+    highlights: { visited: Array.from(visited) },
+    variables: { status: 'Complete', nodesVisited: visited.size },
   });
 
   return { snapshots };
