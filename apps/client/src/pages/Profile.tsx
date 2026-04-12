@@ -31,25 +31,79 @@ const DEFAULT_CATEGORIES = [
   { name: 'Backtracking', completed: 0, total: 5, color: '#fb923c' },
 ];
 
+/** Convert a Date to a YYYY-MM-DD string in local time for reliable day-level comparison */
+function toLocalDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function generateDynamicHeatmapData(activities: any[]): number[] {
-  const days = new Array(364).fill(0);
+  const TOTAL_DAYS = 365;
+  const days = new Array(TOTAL_DAYS).fill(0);
   if (!activities || !activities.length) return days;
   
-  const today = new Date();
-  today.setHours(23, 59, 59, 999);
-  
+  // Build a map of date-string -> count for reliable day grouping
+  const countByDate: Record<string, number> = {};
   activities.forEach(act => {
     if (!act.date) return;
-    const actDate = new Date(act.date);
-    const diffTime = Math.abs(today.getTime() - actDate.getTime());
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays >= 0 && diffDays < 364) {
-      const index = 363 - diffDays;
-      days[index] = Math.min((days[index] || 0) + 1, 4);
-    }
+    const key = toLocalDateStr(new Date(act.date));
+    countByDate[key] = (countByDate[key] || 0) + 1;
   });
+  
+  const today = new Date();
+  // Fill the array: index 0 = (TOTAL_DAYS-1) days ago, last index = today
+  for (let i = 0; i < TOTAL_DAYS; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (TOTAL_DAYS - 1 - i));
+    const key = toLocalDateStr(date);
+    const count = countByDate[key] || 0;
+    // Map raw count to intensity level 0-4
+    if (count === 0) days[i] = 0;
+    else if (count <= 1) days[i] = 1;
+    else if (count <= 3) days[i] = 2;
+    else if (count <= 6) days[i] = 3;
+    else days[i] = 4;
+  }
   return days;
+}
+
+/** Compute current streak from activity data (consecutive days ending today/yesterday) */
+function computeCurrentStreak(activities: any[]): number {
+  if (!activities || !activities.length) return 0;
+  
+  // Get unique active dates
+  const activeDateSet = new Set<string>();
+  activities.forEach(act => {
+    if (!act.date) return;
+    activeDateSet.add(toLocalDateStr(new Date(act.date)));
+  });
+  
+  const today = new Date();
+  const todayStr = toLocalDateStr(today);
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const yesterdayStr = toLocalDateStr(yesterday);
+  
+  // Streak must include today or yesterday
+  let startDate: Date;
+  if (activeDateSet.has(todayStr)) {
+    startDate = today;
+  } else if (activeDateSet.has(yesterdayStr)) {
+    startDate = yesterday;
+  } else {
+    return 0;
+  }
+  
+  let streak = 0;
+  const cursor = new Date(startDate);
+  while (true) {
+    if (activeDateSet.has(toLocalDateStr(cursor))) {
+      streak++;
+      cursor.setDate(cursor.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
 }
 
 const HEATMAP_COLORS = [
@@ -166,11 +220,12 @@ export default function Profile() {
 
   const heatmapData = generateDynamicHeatmapData(profile?.activity || []);
   const totalContributions = profile?.activity?.length || 0;
+  const currentStreak = computeCurrentStreak(profile?.activity || []);
 
   const dynamicStats = [
     { icon: '⚡', value: profile?.profileStats?.algorithmsVisualized || 0, label: 'Algorithms Visualized', color: '#00d4ff' },
     { icon: '✅', value: profile?.profileStats?.testsPassed || 0, label: 'Tests Passed', color: '#34d399' },
-    { icon: '🔥', value: profile?.profileStats?.currentStreak || 0, label: 'Current Streak', color: '#fbbf24' },
+    { icon: '🔥', value: currentStreak, label: 'Current Streak', color: '#fbbf24' },
     { icon: '🎯', value: profile?.profileStats?.accuracy || 0, label: 'Accuracy %', color: '#a78bfa' },
   ];
 

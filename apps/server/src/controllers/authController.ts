@@ -237,8 +237,8 @@ export async function recordRaceHistory(req: AuthRequest, res: Response): Promis
       text: `Race: ${algo1} vs ${algo2} — 🏆 ${winnerLabel} won (${steps1 ?? '?'} vs ${steps2 ?? '?'} steps)`,
       date: new Date(),
     });
-    if (user.activity.length > 30) {
-      user.activity = user.activity.slice(-30);
+    if (user.activity.length > 500) {
+      user.activity = user.activity.slice(-500);
     }
 
     user.markModified('raceHistory');
@@ -275,8 +275,8 @@ export async function recordAlgorithmRun(req: AuthRequest, res: Response): Promi
       text: `Visualized algorithm: ${algorithmKey}`,
       date: new Date(),
     });
-    if (user.activity.length > 30) {
-      user.activity = user.activity.slice(-30);
+    if (user.activity.length > 500) {
+      user.activity = user.activity.slice(-500);
     }
 
     user.markModified('profileStats');

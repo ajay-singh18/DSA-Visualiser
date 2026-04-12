@@ -201,7 +201,7 @@ export default function RaceMode() {
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', overflowY: 'auto', overflowX: 'hidden' }}>
       <Navbar />
 
-      <div style={{ padding: 'var(--space-4) var(--space-8)', display: 'flex', alignItems: 'center', gap: 'var(--space-4)', flexWrap: 'wrap', borderBottom: '1px solid var(--glass-border)', background: 'var(--glass-bg)' }}>
+      <div className="race-toolbar">
         {/* Category Selector */}
         <div style={{ display: 'flex', gap: '4px', background: 'rgba(0,0,0,0.2)', padding: '4px', borderRadius: 'var(--radius-md)' }}>
           {CATEGORIES.map(c => (
@@ -225,7 +225,7 @@ export default function RaceMode() {
           ))}
         </div>
 
-        <div style={{ width: '1px', height: '24px', background: 'var(--glass-border)', margin: '0 8px' }} />
+        <div className="race-toolbar-sep" />
 
         {/* Algo 1 */}
         <select className="select-field" style={{ width: 'auto' }} value={algo1} onChange={e => setAlgo1(e.target.value as AlgorithmType)}>
@@ -239,7 +239,7 @@ export default function RaceMode() {
           {ALGORITHMS_BY_CATEGORY[category].map(a => <option key={a.key} value={a.key}>{a.label}</option>)}
         </select>
 
-        <div style={{ width: '1px', height: '24px', background: 'var(--glass-border)', margin: '0 8px' }} />
+        <div className="race-toolbar-sep" />
 
         {/* Dynamic Inputs Based on Category */}
         {(category === 'sorting' || category === 'searching') && (
@@ -298,9 +298,9 @@ export default function RaceMode() {
       )}
 
       {/* Split race panels */}
-      <div style={{ display: 'flex', flex: 1, gap: 'var(--space-4)', padding: 'var(--space-4) var(--space-8)', minHeight: '500px' }}>
+      <div className="race-panels">
         {/* Left racer */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', borderRadius: 'var(--radius-xl)', background: 'var(--glass-bg)', backdropFilter: 'blur(20px)', border: '1px solid var(--glass-border)', overflow: 'hidden' }}>
+        <div className="race-panel">
           <div style={{ padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontWeight: 500 }}>{ALGORITHMS_BY_CATEGORY[category].find(a => a.key === algo1)?.label}</span>
             {result1 && isRaceFinished && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--on-surface-variant)' }}>{result1.steps} steps</span>}
@@ -316,14 +316,16 @@ export default function RaceMode() {
             currentIndex={playback1.currentIndex} totalSteps={playback1.totalSteps}
             isPlaying={playback1.isPlaying} speed={playback1.speed}
             description={playback1.currentSnapshot?.description || 'Waiting...'}
+            isFinished={playback1.currentIndex >= playback1.totalSteps - 1 && playback1.totalSteps > 0}
             onPlay={playback1.play} onPause={playback1.pause}
             onStepForward={playback1.stepForward} onStepBackward={playback1.stepBackward}
             onSpeedChange={playback1.setSpeed}
+            onReplay={() => { playback1.pause(); playback1.loadSnapshots(playback1.currentSnapshot ? [playback1.currentSnapshot] : []); }}
           />
         </div>
 
         {/* Right racer */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', borderRadius: 'var(--radius-xl)', background: 'var(--glass-bg)', backdropFilter: 'blur(20px)', border: '1px solid var(--glass-border)', overflow: 'hidden' }}>
+        <div className="race-panel">
           <div style={{ padding: 'var(--space-3) var(--space-4)', borderBottom: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontWeight: 500 }}>{ALGORITHMS_BY_CATEGORY[category].find(a => a.key === algo2)?.label}</span>
             {result2 && isRaceFinished && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8125rem', color: 'var(--on-surface-variant)' }}>{result2.steps} steps</span>}
@@ -339,9 +341,11 @@ export default function RaceMode() {
             currentIndex={playback2.currentIndex} totalSteps={playback2.totalSteps}
             isPlaying={playback2.isPlaying} speed={playback2.speed}
             description={playback2.currentSnapshot?.description || 'Waiting...'}
+            isFinished={playback2.currentIndex >= playback2.totalSteps - 1 && playback2.totalSteps > 0}
             onPlay={playback2.play} onPause={playback2.pause}
             onStepForward={playback2.stepForward} onStepBackward={playback2.stepBackward}
             onSpeedChange={playback2.setSpeed}
+            onReplay={() => { playback2.pause(); playback2.loadSnapshots(playback2.currentSnapshot ? [playback2.currentSnapshot] : []); }}
           />
         </div>
       </div>

@@ -202,9 +202,9 @@ export const submitAssessment = async (req: AuthRequest, res: Response): Promise
             text: `Completed ${catName} quiz — ${correctCount}/${total} (${percentage}%)`,
             date: now,
           });
-          // Keep activity to last 30 entries
-          if (user.activity.length > 30) {
-            user.activity = user.activity.slice(-30);
+          // Keep activity — generous limit so 365-day heatmap has data
+          if (user.activity.length > 500) {
+            user.activity = user.activity.slice(-500);
           }
 
           // Check for streak update (if last activity was yesterday)
