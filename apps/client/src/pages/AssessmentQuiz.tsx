@@ -280,7 +280,7 @@ export default function AssessmentQuiz() {
               <button
                 className="btn"
                 onClick={() => setCurrentIndex(prev => Math.min(state.questions.length - 1, prev + 1))}
-                style={{ background: 'rgba(255,255,255,0.1)', color: 'white' }}
+                style={{ background: 'var(--glass-bg)', color: 'var(--on-surface)' }}
               >
                 Next →
               </button>

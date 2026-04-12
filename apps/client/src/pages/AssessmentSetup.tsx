@@ -90,7 +90,7 @@ export default function AssessmentSetup() {
                     }}
                   >
                     <span style={{ fontSize: '2rem' }}>{cat.icon}</span>
-                    <span style={{ fontWeight: 600, color: selectedCategory === cat.id ? '#60a5fa' : 'white' }}>{cat.title}</span>
+                    <span style={{ fontWeight: 600, color: selectedCategory === cat.id ? '#60a5fa' : 'var(--on-surface)' }}>{cat.title}</span>
                     <span style={{ fontSize: '0.875rem', color: 'var(--on-surface-variant)' }}>{cat.desc}</span>
                   </button>
                 ))}

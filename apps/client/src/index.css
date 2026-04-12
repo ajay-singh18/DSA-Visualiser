@@ -219,7 +219,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .select-field option {
   background: #1e1e24; /* Solid fallback for dropdowns */
-  color: white;
+  color: var(--on-surface);
 }
 
 /* ── Navbar ── */
@@ -240,7 +240,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 1.5rem;
-  color: white;
+  color: var(--on-surface);
   text-shadow: 0 0 10px rgba(255,255,255,0.3);
 }
 
@@ -259,7 +259,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .navbar-links a:hover,
 .navbar-links a.active {
-  color: white;
+  color: var(--on-surface);
   text-shadow: 0 0 8px rgba(255,255,255,0.4);
 }
 
@@ -351,7 +351,7 @@ h1, h2, h3, h4, h5, h6 {
 .bar-label {
   font-family: var(--font-mono);
   font-size: 0.8125rem;
-  color: white;
+  color: var(--on-surface);
 }
 
 /* Highlight states */
@@ -387,7 +387,7 @@ h1, h2, h3, h4, h5, h6 {
 .playback-btn {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  color: white;
+  color: var(--on-surface);
   font-size: 1.25rem;
   cursor: pointer;
   padding: var(--space-2) var(--space-3);
@@ -434,7 +434,7 @@ h1, h2, h3, h4, h5, h6 {
 .speed-btn.active {
   background: var(--glass-bg);
   border-color: var(--glass-border);
-  color: white;
+  color: var(--on-surface);
 }
 
 /* ── Code panel ── */
@@ -458,7 +458,7 @@ h1, h2, h3, h4, h5, h6 {
 .code-tab.active {
   background: rgba(255,255,255,0.1);
   border-color: var(--glass-border);
-  color: white;
+  color: var(--on-surface);
 }
 
 .code-editor-wrapper {
@@ -473,7 +473,7 @@ h1, h2, h3, h4, h5, h6 {
   border-top: 1px solid var(--glass-border);
   font-family: var(--font-body);
   font-size: 1rem;
-  color: white;
+  color: var(--on-surface);
 }
 
 /* ── Auth page ── */
@@ -504,7 +504,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   font-size: 1.5rem;
   margin-bottom: var(--space-6);
-  color: white;
+  color: var(--on-surface);
 }
 .auth-card h2 { text-align: center; margin-bottom: var(--space-6); font-weight: 400; }
 .auth-card .form-group { margin-bottom: var(--space-4); }
@@ -559,7 +559,7 @@ h1, h2, h3, h4, h5, h6 {
   backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
 }
-.stat-card h3 { font-size: 2.5rem; color: white; margin-bottom: var(--space-1); }
+.stat-card h3 { font-size: 2.5rem; color: var(--on-surface); margin-bottom: var(--space-1); }
 
 .layouts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-4); }
 .layout-card { padding: var(--space-6); border-radius: var(--radius-xl); }
@@ -583,7 +583,7 @@ h1, h2, h3, h4, h5, h6 {
   position: fixed; bottom: var(--space-8); right: var(--space-8);
   width: 64px; height: 64px; border-radius: var(--radius-full);
   background: rgba(255,255,255,0.1); backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.3); color: white; font-size: 2rem;
+  border: 1px solid rgba(255,255,255,0.3); color: var(--on-surface); font-size: 2rem;
   box-shadow: 0 8px 32px rgba(0,0,0,0.3); transition: all 0.3s ease;
   cursor: pointer;
 }
@@ -591,7 +591,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ── Monaco Editor Overrides for Glassmorphism ── */
 .current-line-highlight { background-color: rgba(255, 255, 255, 0.1) !important; }
-.current-line-glyph { background-color: white !important; width: 4px !important; margin-left: 2px; }
+.current-line-glyph { background-color: var(--on-surface) !important; width: 4px !important; margin-left: 2px; }
 
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -755,7 +755,7 @@ h1, h2, h3, h4, h5, h6 {
 .profile-display-name {
   font-size: 1.75rem;
   font-weight: 600;
-  color: white;
+  color: var(--on-surface);
   line-height: 1.2;
 }
 .profile-username {
@@ -836,7 +836,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .profile-btn-outline:hover {
   border-color: var(--glass-border-highlight);
-  color: white;
+  color: var(--on-surface);
   background: var(--glass-bg);
 }
 .profile-joined {
@@ -980,7 +980,7 @@ h1, h2, h3, h4, h5, h6 {
 .profile-badge-name {
   font-weight: 600;
   font-size: 0.9375rem;
-  color: white;
+  color: var(--on-surface);
 }
 .profile-badge-desc {
   font-size: 0.75rem;
@@ -1932,7 +1932,7 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 .tracker-check-icon {
-  color: #fff;
+  color: var(--on-surface);
   font-size: 0.75rem;
   font-weight: 800;
   line-height: 1;
