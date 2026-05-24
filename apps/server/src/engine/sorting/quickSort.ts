@@ -36,7 +36,7 @@ export function runQuickSort(input: number[]): {
     const pivot = arr[high];
     snapshots.push({
       stepIndex: step++,
-      codeLine: 3, // let pi = partition(...) abstract location
+      codeLine: 18, // let pi = partition(a, l, h);
       description: `Pivot chosen: arr[${high}]=${pivot}`,
       arrayState: [...arr],
       highlights: { comparing: [high], sorted: [...sortedIndices] },
@@ -48,7 +48,7 @@ export function runQuickSort(input: number[]): {
     for (let j = low; j < high; j++) {
       snapshots.push({
         stepIndex: step++,
-        codeLine: 3, // comparing to pivot
+        codeLine: 8, // if (a[j] < pivot) {
         description: `Comparing arr[${j}]=${arr[j]} with pivot ${pivot}`,
         arrayState: [...arr],
         highlights: { comparing: [j, high], sorted: [...sortedIndices] },
@@ -61,7 +61,7 @@ export function runQuickSort(input: number[]): {
         [arr[i], arr[j]] = [arr[j], arr[i]];
         snapshots.push({
           stepIndex: step++,
-          codeLine: 3, // swapping
+          codeLine: 10, // [a[i], a[j]] = [a[j], a[i]];
           description: `Swapped arr[${i}]=${arr[i]} and arr[${j}]=${arr[j]}`,
           arrayState: [...arr],
           highlights: { swapping: [i, j], sorted: [...sortedIndices] },
@@ -77,7 +77,7 @@ export function runQuickSort(input: number[]): {
 
     snapshots.push({
       stepIndex: step++,
-      codeLine: 3, // pivot placed
+      codeLine: 13, // pivot placed
       description: `Pivot ${pivot} placed at sorted position ${pi}`,
       arrayState: [...arr],
       highlights: { swapping: [pi, high], sorted: [...sortedIndices] },
@@ -95,7 +95,7 @@ export function runQuickSort(input: number[]): {
 
   snapshots.push({
     stepIndex: step++,
-    codeLine: 7, // return arr;
+    codeLine: 24, // return arr;
     description: 'Quick Sort complete!',
     arrayState: [...arr],
     highlights: { sorted: Array.from({ length: arr.length }, (_, k) => k) },

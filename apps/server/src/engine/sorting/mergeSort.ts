@@ -10,7 +10,7 @@ export function runMergeSort(input: number[]): {
 
   snapshots.push({
     stepIndex: step++,
-    codeLine: 1, // function mergeSort(arr)
+    codeLine: 12, // function mergeSort(arr)
     description: `Starting Merge Sort on array of ${arr.length} elements`,
     arrayState: [...arr],
     highlights: {},
@@ -31,7 +31,7 @@ export function runMergeSort(input: number[]): {
 
     snapshots.push({
       stepIndex: step++,
-      codeLine: 3, // const mid = Math.floor(arr.length / 2);
+      codeLine: 17, // let m = Math.floor(left + (right - left) / 2);
       description: `Dividing subarray [${start}..${end}] at midpoint ${mid}`,
       arrayState: [...arr],
       highlights: {
@@ -88,7 +88,7 @@ export function runMergeSort(input: number[]): {
 
     snapshots.push({
       stepIndex: step++,
-      codeLine: 6, // merge complete
+      codeLine: 20, // merge(arr, left, m, right);
       description: `Merged subarray [${start}..${end}]`,
       arrayState: [...arr],
       highlights: {
@@ -108,7 +108,7 @@ export function runMergeSort(input: number[]): {
 
   snapshots.push({
     stepIndex: step++,
-    codeLine: 1, // abstract end
+    codeLine: 24, // return arr;
     description: "Merge Sort complete!",
     arrayState: [...arr],
     highlights: { sorted: Array.from({ length: arr.length }, (_, k) => k) },

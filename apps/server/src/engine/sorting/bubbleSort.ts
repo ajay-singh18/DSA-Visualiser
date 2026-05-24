@@ -26,7 +26,7 @@ export function runBubbleSort(input: number[]): {
       // Comparing
       snapshots.push({
         stepIndex: step++,
-        codeLine: 4, // if (arr[j] > arr[j + 1])
+        codeLine: 5, // if (arr[j] > arr[j + 1])
         description: `Comparing arr[${j}]=${arr[j]} with arr[${j + 1}]=${arr[j + 1]}`,
         arrayState: [...arr],
         highlights: {
@@ -41,7 +41,7 @@ export function runBubbleSort(input: number[]): {
         [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
         snapshots.push({
           stepIndex: step++,
-          codeLine: 5, // [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+          codeLine: 6, // [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
           description: `Swapped arr[${j}] and arr[${j + 1}]`,
           arrayState: [...arr],
           highlights: {
@@ -56,7 +56,7 @@ export function runBubbleSort(input: number[]): {
     // Mark element as sorted
     snapshots.push({
       stepIndex: step++,
-      codeLine: 2, // abstract end of outer loop
+      codeLine: 3, // abstract end of outer loop
       description: `Element at index ${n - 1 - i} is now in its sorted position`,
       arrayState: [...arr],
       highlights: {

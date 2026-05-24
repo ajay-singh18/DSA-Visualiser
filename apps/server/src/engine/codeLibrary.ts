@@ -318,6 +318,15 @@ void quickSort(int arr[]) {
 }`,
     python: `def quick_sort(arr):
     n = len(arr)
+    def partition(a, low, high):
+        pivot = a[high]
+        i = low - 1
+        for j in range(low, high):
+            if a[j] < pivot:
+                i += 1
+                a[i], a[j] = a[j], a[i]
+        a[i + 1], a[high] = a[high], a[i + 1]
+        return i + 1
     def recursive_sort(a, low, high):
         if low < high:
             pi = partition(a, low, high)
@@ -327,6 +336,18 @@ void quickSort(int arr[]) {
     javascript: `function quickSort(arr) {
     const n = arr.length;
     let low = 0, high = n - 1;
+    function partition(a, l, h) {
+        let pivot = a[h];
+        let i = l - 1;
+        for (let j = l; j < h; j++) {
+            if (a[j] < pivot) {
+                i++;
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+        }
+        [a[i + 1], a[h]] = [a[h], a[i + 1]];
+        return i + 1;
+    }
     function recursiveSort(a, l, h) {
         if (l < h) {
             let pi = partition(a, l, h);
