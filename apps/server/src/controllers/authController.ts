@@ -106,7 +106,7 @@ const client = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
 export async function googleLogin(req: Request, res: Response): Promise<void> {
   try {
-    const { credential } = req.body;
+    const { credential, isRegister } = req.body;
     if (!credential) {
       res.status(400).json({ error: 'Google credential is required' });
       return;
@@ -129,8 +129,13 @@ export async function googleLogin(req: Request, res: Response): Promise<void> {
     // Check if user exists
     let user = await User.findOne({ email });
 
-    // If new user, create them (with a dummy password since they use Google)
     if (!user) {
+      if (!isRegister) {
+        res.status(404).json({ error: 'Account does not exist. Please register first.' });
+        return;
+      }
+      
+      // If new user and isRegister is true, create them
       const dummyPassword = await bcrypt.hash(Math.random().toString(36).slice(-10), 10);
       user = await User.create({
         username: name || email.split('@')[0], // fallback username
@@ -148,7 +153,7 @@ export async function googleLogin(req: Request, res: Response): Promise<void> {
     });
   } catch (error) {
     console.error('Google login error:', error);
-    res.status(500).json({ error: 'Failed to authenticate with Google' });
+    res.status(500).json({ error: 'Google Auth Error: ' + ((error as Error).message || 'Unknown error') });
   }
 }
 

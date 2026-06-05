@@ -27,13 +27,17 @@ export function runInsertionSort(data: number[]): { snapshots: Snapshot[] } {
 
     let j = i - 1;
     while (j >= 0 && arr[j] > key) {
-      addSnapshot(5, `Comparing ${key} with arr[${j}] (${arr[j]}). Since ${arr[j]} > ${key}, shifting ${arr[j]} right.`, { comparing: [j, j + 1], sorted: [...sorted] }, { i, j, key });
+      addSnapshot(6, `Comparing ${key} with arr[${j}] (${arr[j]}). Since ${arr[j]} > ${key}, shifting ${arr[j]} right.`, { comparing: [j, j + 1], sorted: [...sorted] }, { i, j, key });
+      
+      // We do a "swap" here purely for visualization purposes so that 'key' doesn't disappear from the screen
       arr[j + 1] = arr[j];
-      addSnapshot(6, `Shifted arr[${j}] right.`, { swapping: [j, j + 1], sorted: [...sorted] }, { i, j, key, shifting: 'Yes' });
+      arr[j] = key; 
+      
+      addSnapshot(7, `Shifted arr[${j}] right.`, { swapping: [j, j + 1], sorted: [...sorted] }, { i, j, key, shifting: 'Yes' });
       j--;
     }
 
-    addSnapshot(9, `Found correct position for ${key} at index ${j + 1}. Inserting it.`, { swapping: [j + 1], sorted: [...sorted] }, { i, j, key, insertionIndex: j + 1 });
+    addSnapshot(9, `Found correct position for ${key} at index ${j + 1}.`, { swapping: [j + 1], sorted: [...sorted] }, { i, j, key, insertionIndex: j + 1 });
     arr[j + 1] = key;
     
     sorted.push(i);

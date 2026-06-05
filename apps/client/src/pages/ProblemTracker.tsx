@@ -8,15 +8,34 @@ const LS_COMPLETED = 'dsa-tracker-completed';
 const LS_STARRED = 'dsa-tracker-starred';
 const LS_NOTES = 'dsa-tracker-notes';
 
+const getUserKey = (baseKey: string) => {
+  const userStr = localStorage.getItem('dsa-user');
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      if (user._id) return `${baseKey}-${user._id}`;
+    } catch (e) {}
+  }
+  return `${baseKey}-guest`;
+};
+
 // ── Persist helpers ──
-function loadSet(key: string): Set<string> {
+function loadSet(baseKey: string): Set<string> {
+  const key = getUserKey(baseKey);
   try { return new Set(JSON.parse(localStorage.getItem(key) || '[]')); } catch { return new Set(); }
 }
-function saveSet(key: string, s: Set<string>) { localStorage.setItem(key, JSON.stringify([...s])); }
-function loadMap(key: string): Record<string, string> {
+function saveSet(baseKey: string, s: Set<string>) { 
+  const key = getUserKey(baseKey);
+  localStorage.setItem(key, JSON.stringify([...s])); 
+}
+function loadMap(baseKey: string): Record<string, string> {
+  const key = getUserKey(baseKey);
   try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch { return {}; }
 }
-function saveMap(key: string, m: Record<string, string>) { localStorage.setItem(key, JSON.stringify(m)); }
+function saveMap(baseKey: string, m: Record<string, string>) { 
+  const key = getUserKey(baseKey);
+  localStorage.setItem(key, JSON.stringify(m)); 
+}
 
 // ── Difficulty filter type ──
 type DifficultyFilter = 'All' | Difficulty;

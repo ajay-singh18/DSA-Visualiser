@@ -15,7 +15,8 @@ export default function Login() {
     try {
       setLoading(true);
       const { data } = await apiClient.post('/auth/google', {
-        credential: credentialResponse.credential
+        credential: credentialResponse.credential,
+        isRegister: false
       });
       localStorage.setItem('dsa-token', data.token);
       localStorage.setItem('dsa-user', JSON.stringify(data.user));

@@ -44,46 +44,69 @@ export function runMergeSort(input: number[]): {
     mergeSortHelper(start, mid);
     mergeSortHelper(mid + 1, end);
 
-    // Merge step
-    const left = arr.slice(start, mid + 1);
-    const right = arr.slice(mid + 1, end + 1);
-    let i = 0,
-      j = 0,
-      k = start;
+    // In-place Merge step
+    let start1 = start;
+    let start2 = mid + 1;
 
-    while (i < left.length && j < right.length) {
+    // If the direct merge is already sorted
+    if (arr[mid] <= arr[start2]) {
+      snapshots.push({
+        stepIndex: step++,
+        codeLine: 20, // merge(arr, left, m, right);
+        description: `Subarray [${start}..${end}] is already merged`,
+        arrayState: [...arr],
+        highlights: {
+          sorted: Array.from(
+            { length: end - start + 1 },
+            (_, idx) => start + idx,
+          ),
+        },
+        callStack: [...callStack],
+        variables: { start, end, mid, length: end - start + 1 },
+      });
+      callStack.pop();
+      return;
+    }
+
+    // Two pointers to maintain start of both arrays to merge
+    while (start1 <= mid && start2 <= end) {
       snapshots.push({
         stepIndex: step++,
         codeLine: 6, // return merge(left, right); (abstract merge step)
-        description: `Comparing ${left[i]} (left) with ${right[j]} (right)`,
+        description: `Comparing ${arr[start1]} with ${arr[start2]}`,
         arrayState: [...arr],
-        highlights: { comparing: [start + i, mid + 1 + j] },
+        highlights: { comparing: [start1, start2] },
         callStack: [...callStack],
-        variables: { start, end, mid, i, j, k },
+        variables: { start, end, mid, start1, start2 },
       });
 
-      if (left[i] <= right[j]) {
-        arr[k++] = left[i++];
+      if (arr[start1] <= arr[start2]) {
+        start1++;
       } else {
-        arr[k++] = right[j++];
+        const value = arr[start2];
+        let index = start2;
+
+        // Shift all elements between start1 and start2 right by 1
+        while (index !== start1) {
+          arr[index] = arr[index - 1];
+          index--;
+        }
+        arr[start1] = value;
+
+        snapshots.push({
+          stepIndex: step++,
+          codeLine: 6, // placed element
+          description: `Placed ${value} at index ${start1}`,
+          arrayState: [...arr],
+          highlights: { swapping: [start1] },
+          callStack: [...callStack],
+          variables: { start, end, mid, start1, start2 },
+        });
+
+        start1++;
+        mid++;
+        start2++;
       }
-
-      snapshots.push({
-        stepIndex: step++,
-        codeLine: 6, // placed element
-        description: `Placed ${arr[k - 1]} at index ${k - 1}`,
-        arrayState: [...arr],
-        highlights: { swapping: [k - 1] },
-        callStack: [...callStack],
-        variables: { start, end, mid, i, j, k },
-      });
-    }
-
-    while (i < left.length) {
-      arr[k++] = left[i++];
-    }
-    while (j < right.length) {
-      arr[k++] = right[j++];
     }
 
     snapshots.push({
