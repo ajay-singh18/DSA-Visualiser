@@ -27,7 +27,7 @@ export function runMergeSort(input: number[]): {
       return;
     }
 
-    const mid = Math.floor((start + end) / 2);
+    let mid = Math.floor((start + end) / 2);
 
     snapshots.push({
       stepIndex: step++,
