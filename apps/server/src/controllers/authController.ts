@@ -106,25 +106,46 @@ const client = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
 export async function googleLogin(req: Request, res: Response): Promise<void> {
   try {
-    const { credential, isRegister } = req.body;
-    if (!credential) {
-      res.status(400).json({ error: 'Google credential is required' });
+    const { credential, access_token, isRegister } = req.body;
+    if (!credential && !access_token) {
+      res.status(400).json({ error: 'Google credential or access_token is required' });
       return;
     }
 
-    // Verify token
-    const ticket = await client.verifyIdToken({
-      idToken: credential,
-      audience: env.GOOGLE_CLIENT_ID,
-    });
-    
-    const payload = ticket.getPayload();
-    if (!payload || !payload.email) {
-      res.status(400).json({ error: 'Invalid Google token payload' });
-      return;
-    }
+    let email: string;
+    let name: string | undefined;
 
-    const { email, name } = payload;
+    if (credential) {
+      // Verify ID token
+      const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: env.GOOGLE_CLIENT_ID,
+      });
+      
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email) {
+        res.status(400).json({ error: 'Invalid Google token payload' });
+        return;
+      }
+      email = payload.email;
+      name = payload.name;
+    } else {
+      // Fetch user info using access_token
+      const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${access_token}` }
+      });
+      if (!response.ok) {
+        res.status(400).json({ error: 'Failed to fetch user info from Google' });
+        return;
+      }
+      const data = await response.json();
+      if (!data.email) {
+        res.status(400).json({ error: 'Invalid Google user info' });
+        return;
+      }
+      email = data.email;
+      name = data.name;
+    }
 
     // Check if user exists
     let user = await User.findOne({ email });
